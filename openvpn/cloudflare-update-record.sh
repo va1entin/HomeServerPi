@@ -3,17 +3,23 @@
 
 #set -x
 
-# These API tokens are required
+# HOW TO
+
+# Create these API tokens:
 
 # READ TOKEN permissions:
 # Zone.DNS
 # EDIT TOKEN permissions:
 # Account.Access: Organizations, Identity Providers, and Groups, Zone.Zone Settings, Zone.Zone, Zone.DNS
 
-read_token="YOUR READ TOKEN"
-edit_token="YOUR EDIT TOKEN"
-zone_name="domain.tld"
-record_name="sub.domain.tld"
+# Put your tokens into a file called cloudflare.config like so:
+
+#read_token="YOUR READ TOKEN"
+#edit_token="YOUR EDIT TOKEN"
+#zone_name="domain.tld"
+#record_name="sub.domain.tld"
+
+source /root/cloudflare.config
 
 # MAYBE CHANGE THESE
 ip=$(curl -s http://ipv4.icanhazip.com)
