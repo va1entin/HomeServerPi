@@ -1,0 +1,10 @@
+[Unit]
+Description=MJPEG streamer using streamEye
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/root/streameye/streameye.sh
+
+[Install]
+WantedBy=multi-user.target
