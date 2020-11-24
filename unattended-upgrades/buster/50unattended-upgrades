@@ -28,18 +28,20 @@ Unattended-Upgrade::Origins-Pattern {
         // but the Debian release itself will not be automatically upgraded.
 //      "origin=Debian,codename=${distro_codename}-updates";
 //      "origin=Debian,codename=${distro_codename}-proposed-updates";
-        "origin=Debian,codename=${distro_codename},label=Debian";
-        "origin=Debian,codename=${distro_codename},label=Debian-Security";
+//        "origin=Debian,codename=${distro_codename},label=Debian";
+//        "origin=Debian,codename=${distro_codename},label=Debian-Security";
 
         // Archive or Suite based matching:
         // Note that this will silently match a different release after
         // migration to the specified archive (e.g. testing becomes the
         // new stable).
-      "o=Raspberry Pi Foundation,a=stable";
-      "o=Debian,a=stable";
-      "o=Debian,a=stable-updates";
-      "o=Debian,a=proposed-updates";
+//      "o=Raspberry Pi Foundation,a=stable";
+//      "o=Debian,a=stable";
+//      "o=Debian,a=stable-updates";
+//      "o=Debian,a=proposed-updates";
 //      "o=Debian Backports,a=${distro_codename}-backports,l=Debian Backports";
+      "origin=Raspbian,codename=${distro_codename},label=Raspbian";
+      "origin=Raspberry Pi Foundation,codename=${distro_codename},label=Raspberry Pi Foundation";
 };
 
 // Python regular expressions, matching packages to exclude from upgrading
@@ -65,7 +67,7 @@ Unattended-Upgrade::Package-Blacklist {
 };
 
 // This option allows you to control if on a unclean dpkg exit
-// unattended-upgrades will automatically run 
+// unattended-upgrades will automatically run
 //   dpkg --force-confold --configure -a
 // The default is true, to ensure updates keep getting installed
 //Unattended-Upgrade::AutoFixInterruptedDpkg "true";
@@ -110,16 +112,16 @@ Unattended-Upgrade::Package-Blacklist {
 
 // Automatically reboot *WITHOUT CONFIRMATION* if
 //  the file /var/run/reboot-required is found after the upgrade
-Unattended-Upgrade::Automatic-Reboot "04:00";
+Unattended-Upgrade::Automatic-Reboot "true";
 
 // Automatically reboot even if there are users currently logged in
 // when Unattended-Upgrade::Automatic-Reboot is set to true
-//Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
+Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
 
 // If automatic reboot is enabled and needed, reboot at the specific
 // time instead of immediately
 //  Default: "now"
-//Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+Unattended-Upgrade::Automatic-Reboot-Time "04:00";
 
 // Use apt bandwidth limit feature, this example limits the download
 // speed to 70kb/sec
