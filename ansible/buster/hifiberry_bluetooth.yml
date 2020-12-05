@@ -1,0 +1,109 @@
+---
+- name: HifiBerry & Bluetooth Audio
+  hosts: "cluster"
+  vars:
+    alsa_bluetooth_dependencies: [alsa-base, alsa-utils, bluealsa, bluez-tools]
+  tasks:
+    # HifiBerry, see https://www.hifiberry.com/docs/software/configuring-linux-3-18-x/
+    - name: Add modified /boot/config.txt
+      ansible.builtin.copy:
+        src: ../../boot/config.txt
+        dest: /boot/config.txt
+
+    - name: Install mplayer to test audio playback
+      ansible.builtin.apt:
+        name: "mplayer"
+        force_apt_get: true
+
+    - name: Add test song
+      ansible.builtin.copy:
+        src: "~/music/Another Brick in the Wall (The Wall) - Pink Floyd.opus"
+        dest: /root/another_brick_in_the_wall.opus
+
+    # Bluetooh Audio, based on https://github.com/nicokaiser/rpi-audio-receiver/blob/main/install-bluetooth.sh at f594f4e
+    - name: Install alsa and bluetooth dependencies
+      ansible.builtin.apt:
+        name: "{{ alsa_bluetooth_dependencies }}"
+        force_apt_get: true
+
+    - name: Add /etc/bluetooth/main.conf
+      ansible.builtin.copy:
+        src: ../../bluetooth/main.conf
+        dest: /etc/bluetooth/main.conf
+
+    - name: Ensure /etc/systemd/system/bthelper@.service.d dir exists
+      ansible.builtin.file:
+        path: /etc/systemd/system/bthelper@.service.d
+        state: directory
+
+    - name: Add systemd service unit override file for bthelper
+      ansible.builtin.copy:
+        src: ../../bluetooth/bthelper_override.conf
+        dest: /etc/systemd/system/bthelper@.service.d/override.conf
+
+    - name: Add systemd service unit file for bt-agent
+      ansible.builtin.copy:
+        src: ../../bluetooth/bt-agent.service
+        dest: /etc/systemd/system/bt-agent.service
+
+    - name: Enable and start bt-agent service
+      ansible.builtin.systemd:
+        name: bt-agent
+        state: restarted
+        enabled: true
+
+    - name: Add modified /lib/modprobe.d/aliases.conf
+      ansible.builtin.copy:
+        src: ../../bluetooth/aliases.conf
+        dest: /lib/modprobe.d/aliases.conf
+
+    - name: Ensure /etc/systemd/system/bluealsa.service.d dir exists
+      ansible.builtin.file:
+        path: /etc/systemd/system/bluealsa.service.d
+        state: directory
+
+    - name: Add systemd service unit override file for bluealsa
+      ansible.builtin.copy:
+        src: ../../bluetooth/bluealsa_override.conf
+        dest: /etc/systemd/system/bluealsa.service.d/override.conf
+
+    - name: Add systemd service unit file for bluealsa-aplay
+      ansible.builtin.copy:
+        src: ../../bluetooth/bluealsa-aplay.service
+        dest: /etc/systemd/system/bluealsa-aplay.service
+
+    - name: Enable and start bluealsa-aplay service
+      ansible.builtin.systemd:
+        name: bluealsa-aplay
+        state: restarted
+        enabled: true
+        daemon_reload: true
+
+    - name: Ensure /usr/local/share/sounds/__custom dir exists
+      ansible.builtin.file:
+        path: /usr/local/share/sounds/__custom
+        state: directory
+
+    - name: Add device-added.wav
+      ansible.builtin.copy:
+        src: ../../bluetooth/device-added.wav
+        dest: /usr/local/share/sounds/__custom/device-added.wav
+
+    - name: Add device-removed.wav
+      ansible.builtin.copy:
+        src: ../../bluetooth/device-removed.wav
+        dest: /usr/local/share/sounds/__custom/device-removed.wav
+
+    - name: Add bluetooth udev script
+      ansible.builtin.copy:
+        src: ../../bluetooth/bluetooth-udev
+        dest: /usr/local/bin/bluetooth-udev
+        mode: 755
+
+    - name: Add bluetooth udev rules
+      ansible.builtin.copy:
+        src: ../../bluetooth/99-bluetooth-udev.rules
+        dest: /etc/udev/rules.d/99-bluetooth-udev.rules
+
+    # - name: Reboot
+    #  ansible.builtin.reboot:
