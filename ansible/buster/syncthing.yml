@@ -21,7 +21,7 @@
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
     - name: Enable linger for user syncthing
-      command: 'loginctl enable-linger syncthing'
+      ansible.builtin.command: 'loginctl enable-linger syncthing'
 
     - name: Add syncthing apt key
       ansible.builtin.apt_key:
