@@ -1,0 +1,60 @@
+---
+- name: Initial setup of raspberry pi
+  hosts: "cluster"
+  vars:
+    new_user_name: val
+    new_user_groups: [sudo, adm]
+    initial_packages: [ssl-cert, apache2, mariadb-server, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate]
+  vars_files:
+    - secrets.yml
+  tasks:
+# Write image to SD card
+# sudo dd bs=4M if=2020-08-20-raspios-buster-armhf.img of=/dev/sdX conv=fsync
+# Add ssh key to default user, password is raspberry
+# ssh-copy-id -i ~/.ssh/id_rsa.pub pi@host
+    - name: Add user
+      ansible.builtin.user:
+        name: "{{ new_user_name }}"
+        groups: "{{ new_user_groups }}"
+        password: "{{ initial_setup_new_user_password }}"
+
+    - name: Copy ssh ID to new user
+      ansible.posix.authorized_key:
+        user: "{{ new_user_name }}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    - name: Update apt cache and upgrade all packages, no dist upgrade
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: true
+        force_apt_get: true
+
+    - name: Install initial packages
+      ansible.builtin.apt:
+        name: "{{ initial_packages }}"
+        force_apt_get: true
+
+    - name: Add unattended-upgrades config
+      ansible.builtin.copy:
+        src: ../../unattended-upgrades/buster/50unattended-upgrades
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+
+    - name: Add sshd config
+      ansible.builtin.copy:
+        src: ../../sshd/buster/sshd_config
+        dest: /etc/ssh/sshd_config
+
+    - name: Add vimrc
+      ansible.builtin.copy:
+        src: ../../vim/buster/vimrc
+        dest: /etc/vim/vimrc
+
+    - name: Change pi's default password
+      ansible.builtin.user:
+        name: pi
+        password: "{{ initial_setup_new_pi_password }}"
+
+    # - name: Reboot
+    #  ansible.builtin.reboot:
