@@ -1,0 +1,68 @@
+---
+- name: Syncthing
+  hosts: "cluster"
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Install apt-transport-https
+      ansible.builtin.apt:
+        name: "apt-transport-https"
+        force_apt_get: true
+
+    - name: Add user syncthing
+      ansible.builtin.user:
+        name: "syncthing"
+        password: "{{ syncthing_user_password }}"
+
+    - name: Copy ssh ID to new user
+      ansible.posix.authorized_key:
+        user: "syncthing"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    - name: Enable linger for user syncthing
+      command: 'loginctl enable-linger syncthing'
+
+    - name: Add syncthing apt key
+      ansible.builtin.apt_key:
+        url: https://syncthing.net/release-key.txt
+        state: present
+
+    - name: Add syncthing apt preference file
+      ansible.builtin.copy:
+        src: ../../syncthing/syncthing_apt-preference
+        dest: /etc/apt/preferences.d/syncthing
+
+    - name: Add apt list syncthing.list
+      ansible.builtin.apt_repository:
+        repo: deb https://apt.syncthing.net/ syncthing stable
+        state: present
+        filename: syncthing
+
+    - name: Install syncthing
+      ansible.builtin.apt:
+        name: "syncthing"
+        force_apt_get: true
+
+    - name: Ensure /home/syncthing/.config/systemd/user/default.target.wants dir exists
+      ansible.builtin.file:
+        path: /home/syncthing/.config/systemd/user/default.target.wants
+        state: directory
+        owner: 'syncthing'
+        group: 'syncthing'
+
+    - name: Download syncthing systemd service unit file
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/syncthing/syncthing/main/etc/linux-systemd/user/syncthing.service
+        dest: /home/syncthing/.config/systemd/user/syncthing.service
+        mode: '0660'
+        owner: 'syncthing'
+        group: 'syncthing'
+
+    - name: Enable and start service
+      become_user: 'syncthing'
+      systemd:
+        name: syncthing
+        scope: user
+        enabled: true
+        state: started
