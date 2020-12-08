@@ -38,17 +38,17 @@
 
     - name: Add unattended-upgrades config
       ansible.builtin.copy:
-        src: ../../unattended-upgrades/buster/50unattended-upgrades
+        src: ../configs/unattended-upgrades/50unattended-upgrades
         dest: /etc/apt/apt.conf.d/50unattended-upgrades
 
     - name: Add sshd config
       ansible.builtin.copy:
-        src: ../../sshd/buster/sshd_config
+        src: ../configs/sshd/sshd_config
         dest: /etc/ssh/sshd_config
 
     - name: Add vimrc
       ansible.builtin.copy:
-        src: ../../vim/buster/vimrc
+        src: ../configs/vim/vimrc
         dest: /etc/vim/vimrc
 
     - name: Change pi's default password

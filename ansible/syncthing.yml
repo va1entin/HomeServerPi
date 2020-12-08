@@ -30,7 +30,7 @@
 
     - name: Add syncthing apt preference file
       ansible.builtin.copy:
-        src: ../../syncthing/syncthing_apt-preference
+        src: ../configs/syncthing/syncthing_apt-preference
         dest: /etc/apt/preferences.d/syncthing
 
     - name: Add apt list syncthing.list

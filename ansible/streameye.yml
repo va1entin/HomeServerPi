@@ -26,13 +26,13 @@
 
     - name: Add streameye.sh
       ansible.builtin.copy:
-        src: ../../streameye/streameye.sh
+        src: ../scripts/streameye/streameye.sh
         dest: /root/streameye/streameye.sh
         mode: preserve
 
     - name: Add systemd service unit file
       ansible.builtin.copy:
-        src: ../../streameye/streameye.service
+        src: ../configs/streameye/streameye.service
         dest: /etc/systemd/system/streameye.service
 
     - name: Enable and start streameye service

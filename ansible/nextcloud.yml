@@ -29,17 +29,17 @@
 
     - name: Add MariaDB config
       ansible.builtin.copy:
-        src: ../../mariadb/50-server.cnf
+        src: ../configs/mariadb/50-server.cnf
         dest: /etc/mysql/mariadb.conf.d/50-server.cnf
 
     - name: Add MariaDB access config
       ansible.builtin.copy:
-        src: ../../mariadb/.my.cnf.real
+        src: ../configs/mariadb/.my.cnf.real
         dest: /root/.my.cnf
 
     - name: Add MariaDB access config for debian
       ansible.builtin.copy:
-        src: ../../mariadb/debian.cnf.real
+        src: ../configs/mariadb/debian.cnf.real
         dest: /etc/mysql/debian.cnf
 
     # Has to be done even if you want to import an existing dump afterwards
@@ -89,7 +89,7 @@
 
     - name: Add Apache2 Nextcloud config
       ansible.builtin.copy:
-        src: ../../apache2/nextcloud.conf
+        src: ../configs/apache2/nextcloud.conf
         dest: /etc/apache2/sites-available/nextcloud.conf
 
     - name: Enable site nextcloud.conf
