@@ -14,6 +14,7 @@
       ansible.builtin.apt:
         name: "mplayer"
         force_apt_get: true
+        state: latest
 
     - name: Add test song
       ansible.builtin.copy:
@@ -25,6 +26,7 @@
       ansible.builtin.apt:
         name: "{{ alsa_bluetooth_dependencies }}"
         force_apt_get: true
+        state: latest
 
     - name: Add /etc/bluetooth/main.conf
       ansible.builtin.copy:
@@ -49,8 +51,8 @@
     - name: Enable and start bt-agent service
       ansible.builtin.systemd:
         name: bt-agent
-        state: restarted
         enabled: true
+        state: restarted
 
     - name: Add modified /lib/modprobe.d/aliases.conf
       ansible.builtin.copy:
@@ -75,9 +77,9 @@
     - name: Enable and start bluealsa-aplay service
       ansible.builtin.systemd:
         name: bluealsa-aplay
-        state: restarted
         enabled: true
         daemon_reload: true
+        state: restarted
 
     - name: Ensure /usr/local/share/sounds/__custom dir exists
       ansible.builtin.file:

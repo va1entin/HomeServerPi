@@ -17,24 +17,26 @@
         name: "{{ new_user_name }}"
         groups: "{{ new_user_groups }}"
         password: "{{ initial_setup_new_user_password }}"
+        state: present
 
     - name: Copy ssh ID to new user
       ansible.posix.authorized_key:
         user: "{{ new_user_name }}"
-        state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        state: present
 
     - name: Update apt cache and upgrade all packages, no dist upgrade
       ansible.builtin.apt:
         name: "*"
-        state: latest
         update_cache: true
         force_apt_get: true
+        state: latest
 
     - name: Install initial packages
       ansible.builtin.apt:
         name: "{{ initial_packages }}"
         force_apt_get: true
+        state: latest
 
     - name: Add unattended-upgrades config
       ansible.builtin.copy:
@@ -55,6 +57,7 @@
       ansible.builtin.user:
         name: pi
         password: "{{ initial_setup_new_pi_password }}"
+        state: present
 
     # - name: Reboot
     #  ansible.builtin.reboot:

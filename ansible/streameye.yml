@@ -9,6 +9,7 @@
       ansible.builtin.apt:
         name: "{{ streameye_dependencies }}"
         force_apt_get: true
+        state: latest
 
     - name: Get streameye from GitHub
       ansible.builtin.git:
@@ -38,6 +39,6 @@
     - name: Enable and start streameye service
       ansible.builtin.systemd:
         name: streameye
-        state: restarted
         enabled: true
         daemon_reload: true
+        state: restarted

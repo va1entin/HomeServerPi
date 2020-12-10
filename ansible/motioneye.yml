@@ -9,6 +9,7 @@
       ansible.builtin.apt:
         name: "{{ motioneye_dependencies }}"
         force_apt_get: true
+        state: latest
 
     - name: Download motion
       ansible.builtin.get_url:
@@ -30,8 +31,8 @@
     - name: Create motioneye config dir if it does not exist
       ansible.builtin.file:
         path: /etc/motioneye
-        state: directory
         mode: '0750'
+        state: directory
 
     - name: Add motioneye config file
       ansible.builtin.copy:
@@ -42,8 +43,8 @@
     - name: Create motioneye media dir if it does not exist
       ansible.builtin.file:
         path: /var/lib/motioneye
-        state: directory
         mode: '0750'
+        state: directory
 
     - name: Add systemd service unit file
       ansible.builtin.copy:
@@ -54,6 +55,6 @@
     - name: Enable and start motioneye service
       ansible.builtin.systemd:
         name: motioneye
-        state: restarted
         enabled: true
         daemon_reload: true
+        state: restarted

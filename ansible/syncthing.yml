@@ -8,17 +8,19 @@
       ansible.builtin.apt:
         name: "apt-transport-https"
         force_apt_get: true
+        state: latest
 
     - name: Add user syncthing
       ansible.builtin.user:
         name: "syncthing"
         password: "{{ syncthing_user_password }}"
+        state: present
 
     - name: Copy ssh ID to new user
       ansible.posix.authorized_key:
         user: "syncthing"
-        state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        state: present
 
     - name: Enable linger for user syncthing
       ansible.builtin.command: 'loginctl enable-linger syncthing'
@@ -36,20 +38,21 @@
     - name: Add apt list syncthing.list
       ansible.builtin.apt_repository:
         repo: deb https://apt.syncthing.net/ syncthing stable
-        state: present
         filename: syncthing
+        state: present
 
     - name: Install syncthing
       ansible.builtin.apt:
         name: "syncthing"
         force_apt_get: true
+        state: latest
 
     - name: Ensure /home/syncthing/.config/systemd/user/default.target.wants dir exists
       ansible.builtin.file:
         path: /home/syncthing/.config/systemd/user/default.target.wants
-        state: directory
         owner: 'syncthing'
         group: 'syncthing'
+        state: directory
 
     - name: Download syncthing systemd service unit file
       ansible.builtin.get_url:
