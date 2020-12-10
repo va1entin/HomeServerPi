@@ -24,7 +24,7 @@
         - name: Change MariaDB root password
           community.mysql.mysql_user:
             name: root
-            password: "{{ nextcloud_mariadb_root_password }}"
+            password: "{{ vault_nextcloud_mariadb_root_password }}"
             state: present
       rescue:
         - debug:
@@ -54,7 +54,7 @@
     - name: Create nextcloud user in MariaDB
       community.mysql.mysql_user:
         name: nextcloud
-        password: "{{ nextcloud_mariadb_user_password }}"
+        password: "{{ vault_nextcloud_mariadb_user_password }}"
         priv: 'nextcloud-db.*:ALL'
         state: present
 

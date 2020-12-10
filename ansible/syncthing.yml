@@ -13,7 +13,7 @@
     - name: Add user syncthing
       ansible.builtin.user:
         name: "syncthing"
-        password: "{{ syncthing_user_password }}"
+        password: "{{ vault_syncthing_user_password }}"
         state: present
 
     - name: Copy ssh ID to new user
