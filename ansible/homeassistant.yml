@@ -1,0 +1,59 @@
+---
+- name: HomeAssistant
+  hosts: "cluster"
+  vars:
+    host_config_dir: /etc/homeassistant
+    host_deconz_dir: /opt/deconz
+  tasks:
+    - name: Install python-docker and yamllint
+      ansible.builtin.apt:
+        name: "python-docker,yamllint"
+        force_apt_get: true
+        state: latest
+
+    - name: Ensure {{ host_deconz_dir }} dir exists
+      ansible.builtin.file:
+        path: "{{ host_deconz_dir }}"
+        state: directory
+
+    # ansible-galaxy collection install community.general
+    - name: Run deCONZ container
+      community.general.docker_container:
+        name: deconz
+        image: marthoc/deconz:stable
+        detach: true
+        network_mode: host
+        restart: true
+        restart_policy: always
+        pull: true
+        volumes:
+          - "/etc/localtime:/etc/localtime:ro"
+          - "{{ host_deconz_dir }}:/root/.local/share/dresden-elektronik/deCONZ"
+        env:
+          TZ: "Europe/Berlin"
+          DECONZ_WS_PORT: "8124"
+          DECONZ_WEB_PORT: "8125"
+        devices:
+          - "/dev/ttyACM0:/dev/ttyACM0"
+        state: started
+
+    - name: Ensure {{ host_config_dir }} dir exists
+      ansible.builtin.file:
+        path: "{{ host_config_dir }}"
+        state: directory
+
+    # ansible-galaxy collection install community.general
+    - name: Run HomeAssistant container
+      community.general.docker_container:
+        name: homeassistant
+        image: homeassistant/raspberrypi4-homeassistant:stable
+        detach: true
+        network_mode: host
+        restart: true
+        restart_policy: always
+        pull: true
+        volumes:
+          - "{{ host_config_dir }}:/config"
+        env:
+          TZ: "Europe/Berlin"
+        state: started
