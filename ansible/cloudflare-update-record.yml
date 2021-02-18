@@ -1,0 +1,24 @@
+---
+- name: Add cloudflare-update-record.yml
+  hosts: "cluster"
+  tasks:
+    - name: Add script for DynDns renewal
+      copy:
+        src: ../../tools/cloudflare-update-record/cloudflare-update-record.py
+        dest: /root
+        mode: '0744'
+
+    - name: Add config for DynDns renewal script
+      copy:
+        src: ../configs/cloudflare/cloudflare-config.yaml
+        dest: /root/cloudflare-update-record_config.yaml
+        mode: '0600'
+
+    - name: Add cron job for DynDns renewal
+      cron:
+        name: "Update DynDns at cloudflare"
+        cron_file: "cloudflare-update-record"
+        user: "root"
+        minute: "0"
+        hour: "*/4"
+        job: "/root/cloudflare-update-record.py -4"
