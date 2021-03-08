@@ -1,0 +1,57 @@
+---
+- name: Setup events_today with mail_dat
+  hosts: "cluster"
+  vars:
+    events_today_mail_dat_dependencies: [python3-caldav, python3-gnupg]
+    caldav_pw_file: "/root/.caldav.pw"
+    smtp_pw_file: "/root/.smtp.pw"
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Install python caldav and gnupg dependencies
+      ansible.builtin.apt:
+        name: "{{ events_today_mail_dat_dependencies }}"
+        force_apt_get: true
+        state: latest
+
+    - name: Get tools from GitHub
+      ansible.builtin.git:
+        repo: 'https://github.com/va1entin/tools'
+        dest: /root/tools
+        force: true
+
+    - name: Ensure gpghome dir exists; key must be imported and trusted manually something like this; gpg --homedir ~/gpghome --import ~/my_pub_key.asc ; gpg --homedir ~/gpghome --edit-key to_address@example.com -> trust -> 5 -> y -> save
+      ansible.builtin.file:
+        path: /root/gpghome
+        owner: 'root'
+        group: 'root'
+        mode: '700'
+        state: directory
+
+    - name: Create caldav pw file
+      ansible.builtin.copy:
+        dest: "{{ caldav_pw_file }}"
+        mode: '400'
+        content: "{{ vault_caldav_pw }}"
+
+    - name: Create smtp pw file
+      ansible.builtin.copy:
+        dest: "{{ smtp_pw_file }}"
+        mode: '400'
+        content: "{{ vault_smtp_pw }}"
+
+    - name: Add cron job
+      cron:
+        name: "Get today's events and mail them"
+        cron_file: "events_today-mail_dat"
+        user: "root"
+        minute: "0"
+        hour: "6"
+        job: 'events=$(python3 /root/tools/events_today/events_today.py --url "{{ vault_caldav_url }}" -u "{{ vault_caldav_user }}" -p "$(cat "{{ caldav_pw_file }}")" -c "{{ vault_caldav_calendar }}") && if [[ -n $events ]]; then python3 /root/tools/mail_dat/mail_dat.py -f "{{ vault_mail_dat_from_address }}" -t "{{ vault_mail_dat_to_address }}" -s "Events today!" -u smtp.gmail.com -p $(cat "{{ smtp_pw_file }}") -m "${events}" --gpg-home /root/gpghome; fi'
+
+    - name: Set bash as SHELL of cron job
+      community.general.cronvar:
+        name: "SHELL"
+        value: "/bin/bash"
+        user: root
+        cron_file: "events_today-mail_dat"
