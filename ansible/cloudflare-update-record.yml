@@ -2,16 +2,15 @@
 - name: Add cloudflare-update-record.yml
   hosts: "cluster"
   tasks:
-    - name: Add script for DynDns renewal
-      copy:
-        src: ../../tools/cloudflare-update-record/cloudflare-update-record.py
-        dest: /root
-        mode: '0744'
+    - name: Get tools from GitHub
+      ansible.builtin.git:
+        repo: 'https://github.com/va1entin/tools'
+        dest: /root/tools
 
     - name: Add config for DynDns renewal script
       copy:
         src: ../configs/cloudflare/cloudflare-config.yaml
-        dest: /root/cloudflare-update-record_config.yaml
+        dest: /root/tools/cloudflare-update-record/cloudflare-update-record_config.yaml
         mode: '0600'
 
     - name: Add cron job for DynDns renewal
@@ -21,4 +20,4 @@
         user: "root"
         minute: "0"
         hour: "*/4"
-        job: "/root/cloudflare-update-record.py -4"
+        job: "/root/tools/cloudflare-update-record/cloudflare-update-record.py -4"
