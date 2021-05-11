@@ -4,10 +4,12 @@
   vars:
     host_config_dir: /etc/homeassistant
     host_deconz_dir: /opt/deconz
+  vars_files:
+    - secrets.yml
   tasks:
     - name: Install python-docker and yamllint
       ansible.builtin.apt:
-        name: "python-docker,yamllint"
+        name: "python3-docker,yamllint"
         force_apt_get: true
         state: latest
 
@@ -33,8 +35,11 @@
           TZ: "Europe/Berlin"
           DECONZ_WS_PORT: "8124"
           DECONZ_WEB_PORT: "8125"
+          DECONZ_VNC_MODE: "1"
+          DECONZ_VNC_PORT: "8126"
+          DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
         devices:
-          - "/dev/ttyACM0:/dev/ttyACM0"
+          - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
         state: started
 
     - name: Ensure {{ host_config_dir }} dir exists
