@@ -33,16 +33,6 @@
         src: ../configs/bluetooth/main.conf
         dest: /etc/bluetooth/main.conf
 
-    - name: Ensure /etc/systemd/system/bthelper@.service.d dir exists
-      ansible.builtin.file:
-        path: /etc/systemd/system/bthelper@.service.d
-        state: directory
-
-    - name: Add systemd service unit override file for bthelper
-      ansible.builtin.copy:
-        src: ../configs/bluetooth/bthelper_override.conf
-        dest: /etc/systemd/system/bthelper@.service.d/override.conf
-
     - name: Add systemd service unit file for bt-agent
       ansible.builtin.copy:
         src: ../configs/bluetooth/bt-agent.service
