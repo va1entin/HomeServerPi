@@ -42,8 +42,8 @@ Unattended-Upgrade::Origins-Pattern {
 //      "o=Debian Backports,a=${distro_codename}-backports,l=Debian Backports";
       "origin=Raspbian,codename=${distro_codename},label=Raspbian";
       "origin=Raspberry Pi Foundation,codename=${distro_codename},label=Raspberry Pi Foundation";
-      "Docker:${distro_codename}";
-      "syncthing:syncthing";
+      "o=Docker,a=${distro_codename}";
+      "o=Syncthing,a=syncthing";
 };
 
 // Python regular expressions, matching packages to exclude from upgrading
