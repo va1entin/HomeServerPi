@@ -59,5 +59,13 @@
         password: "{{ vault_initial_setup_new_pi_password }}"
         state: present
 
+    - name: Add cron job - reboot on lost internet connection
+      cron:
+        name: "Reboot on lost internet connection"
+        cron_file: "reboot_on_lost_internet_connection"
+        user: "root"
+        minute: "*/30"
+        job: 'ping -c4 google.com || shutdown -r now'
+
     # - name: Reboot
     #  ansible.builtin.reboot:
