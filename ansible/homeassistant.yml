@@ -62,3 +62,12 @@
         env:
           TZ: "Europe/Berlin"
         state: started
+
+    # ansible-galaxy collection install community.docker
+    - name: Prune docker
+      community.docker.docker_prune:
+        containers: true
+        images: true
+        networks: true
+        volumes: true
+        builder_cache: true
