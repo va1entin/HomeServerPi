@@ -18,9 +18,9 @@
         path: "{{ host_deconz_dir }}"
         state: directory
 
-    # ansible-galaxy collection install community.general
+    # ansible-galaxy collection install community.docker
     - name: Run deCONZ container
-      community.general.docker_container:
+      community.docker.docker_container:
         name: deconz
         image: marthoc/deconz:stable
         detach: true
@@ -47,9 +47,9 @@
         path: "{{ host_config_dir }}"
         state: directory
 
-    # ansible-galaxy collection install community.general
+    # ansible-galaxy collection install community.docker
     - name: Run HomeAssistant container
-      community.general.docker_container:
+      community.docker.docker_container:
         name: homeassistant
         image: homeassistant/raspberrypi4-homeassistant:stable
         detach: true
