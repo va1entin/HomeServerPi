@@ -52,6 +52,7 @@
       community.docker.docker_container:
         name: homeassistant
         image: homeassistant/raspberrypi4-homeassistant:stable
+        privileged: true
         detach: true
         network_mode: host
         restart: true
