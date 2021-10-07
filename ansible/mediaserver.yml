@@ -1,0 +1,60 @@
+---
+- name: Media Server based on minidlna (ReadyMedia) and SFTP
+  hosts: "cluster"
+  vars:
+    sftp_user_name: mediaserver
+    inotify_max_user_watches: 1048576
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Add sftp user
+      ansible.builtin.user:
+        name: "{{ sftp_user_name }}"
+        password: "{{ vault_media_server_sftp_user_password }}"
+        state: present
+
+    - name: Ensure movies dir exists
+      ansible.builtin.file:
+        path: /home/{{ sftp_user_name }}/Movies
+        owner: "{{ sftp_user_name }}"
+        group: "{{ sftp_user_name }}"
+        state: directory
+
+    - name: Ensure series dir exists
+      ansible.builtin.file:
+        path: /home/{{ sftp_user_name }}/Series
+        owner: "{{ sftp_user_name }}"
+        group: "{{ sftp_user_name }}"
+        state: directory
+
+    - name: Install minidlna
+      ansible.builtin.apt:
+        name: "minidlna"
+        state: latest
+
+    - name: Add minidlna config
+      ansible.builtin.template:
+        src: ../configs/minidlna/minidlna.conf.j2
+        dest: /etc/minidlna.conf
+
+    - name: Increase inotify max_user_watches via sysctl
+      ansible.posix.sysctl:
+        name: fs.inotify.max_user_watches
+        value: "{{ inotify_max_user_watches }}"
+        sysctl_set: yes
+        reload: yes
+        state: present
+
+    - name: Add cron job to restart minidlna daily due to inotify problems
+      cron:
+        name: "Force-Reload minidlna due to inotify problems"
+        cron_file: "minidlna_force_reload"
+        user: "root"
+        minute: "0"
+        hour: "5"
+        job: 'systemctl force-reload minidlna.service'
+
+    - name: Restart minidlna service
+      ansible.builtin.systemd:
+        name: minidlna
+        state: restarted
