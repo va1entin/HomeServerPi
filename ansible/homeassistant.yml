@@ -35,9 +35,9 @@
           TZ: "Europe/Berlin"
           DECONZ_WS_PORT: "8124"
           DECONZ_WEB_PORT: "8125"
-          #DECONZ_VNC_MODE: "1"
-          #DECONZ_VNC_PORT: "8126"
-          #DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
+          # DECONZ_VNC_MODE: "1"
+          # DECONZ_VNC_PORT: "8126"
+          # DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
         devices:
           - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
         state: started
