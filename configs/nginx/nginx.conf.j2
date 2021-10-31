@@ -1,0 +1,19 @@
+http {
+    server {
+        listen 80;
+
+        location / {
+        }
+
+        location /media/ {
+            alias {{ container_content_dir }}/;
+            autoindex on;
+        }
+
+        location /media {
+            return 301 /media/;
+        }
+    }
+}
+
+events {}

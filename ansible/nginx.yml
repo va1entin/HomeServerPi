@@ -1,0 +1,51 @@
+---
+- name: Nginx
+  hosts: "cluster"
+  vars:
+    host_config_dir: /etc/nginx
+    host_content_dir: /home/mediaserver
+    container_content_dir: /media
+    nginx_location: /mediavault/
+  tasks:
+    - name: Install python-docker and yamllint
+      ansible.builtin.apt:
+        name: "python3-docker,yamllint"
+        force_apt_get: true
+        state: latest
+
+    - name: Ensure {{ host_config_dir }} dir exists
+      ansible.builtin.file:
+        path: "{{ host_config_dir }}"
+        state: directory
+
+    - name: Ensure {{ host_config_dir }}/html dir exists
+      ansible.builtin.file:
+        path: "{{ host_config_dir }}/html"
+        state: directory
+
+    - name: Add nginx config
+      ansible.builtin.template:
+        src: ../configs/nginx/nginx.conf.j2
+        dest: "{{ host_config_dir }}/nginx.conf"
+
+    - name: Add nginx index.html
+      ansible.builtin.template:
+        src: ../configs/nginx/html/index.html.j2
+        dest: "{{ host_config_dir }}/html/index.html"
+
+    # ansible-galaxy collection install community.docker
+    - name: Run nginx container
+      community.docker.docker_container:
+        name: nginx
+        image: nginx:stable
+        detach: true
+        network_mode: host
+        restart: true
+        restart_policy: always
+        pull: true
+        volumes:
+          - "{{ host_config_dir }}:/etc/nginx:ro"
+          - "{{ host_content_dir }}:{{ container_content_dir }}:ro"
+        env:
+          TZ: "Europe/Berlin"
+        state: started
