@@ -1,3 +1,2 @@
-openvpn/cloudflare.config
-mariadb/debian.cnf.real
-mariadb/.my.cnf.real
+ansible/*.retry
+ignore/*
