@@ -33,7 +33,7 @@
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/nginx/nginx/master/conf/mime.types
         dest: "{{ config_dir }}/mime.types"
-        mode: '0664'
+        mode: "0664"
 
     - name: Add nginx index.html
       ansible.builtin.template:
@@ -44,6 +44,7 @@
       ansible.builtin.git:
         repo: 'https://github.com/va1entin/nginx-autoindex-theme'
         dest: "{{ content_dir }}/nginx-autoindex-theme"
+        force: yes
 
     # ansible-galaxy collection install community.docker
     - name: Run nginx container
