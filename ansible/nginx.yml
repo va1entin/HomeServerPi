@@ -2,8 +2,9 @@
 - name: Nginx
   hosts: "cluster"
   vars:
-    host_config_dir: /etc/nginx
-    host_content_dir: /home/mediaserver
+    config_dir: /etc/nginx
+    content_dir: "{{ config_dir }}/html"
+    host_media_dir: /home/mediaserver
     container_content_dir: /media
     nginx_location: /mediavault/
   tasks:
@@ -13,31 +14,36 @@
         force_apt_get: true
         state: latest
 
-    - name: Ensure {{ host_config_dir }} dir exists
+    - name: Ensure {{ config_dir }} dir exists
       ansible.builtin.file:
-        path: "{{ host_config_dir }}"
+        path: "{{ config_dir }}"
         state: directory
 
-    - name: Ensure {{ host_config_dir }}/html dir exists
+    - name: Ensure {{ content_dir }} dir exists
       ansible.builtin.file:
-        path: "{{ host_config_dir }}/html"
+        path: "{{ content_dir }}"
         state: directory
 
     - name: Add nginx config
       ansible.builtin.template:
         src: ../configs/nginx/nginx.conf.j2
-        dest: "{{ host_config_dir }}/nginx.conf"
+        dest: "{{ config_dir }}/nginx.conf"
 
-    - name: Download mime.types
+    - name: Get mime.types from GitHub
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/nginx/nginx/master/conf/mime.types
-        dest: "{{ host_config_dir }}/mime.types"
+        dest: "{{ config_dir }}/mime.types"
         mode: '0664'
 
     - name: Add nginx index.html
       ansible.builtin.template:
         src: ../configs/nginx/html/index.html.j2
-        dest: "{{ host_config_dir }}/html/index.html"
+        dest: "{{ content_dir }}/index.html"
+
+    - name: Get nginx-autoindex-theme from GitHub
+      ansible.builtin.git:
+        repo: 'https://github.com/va1entin/nginx-autoindex-theme'
+        dest: "{{ content_dir }}/nginx-autoindex-theme"
 
     # ansible-galaxy collection install community.docker
     - name: Run nginx container
@@ -50,8 +56,8 @@
         restart_policy: always
         pull: true
         volumes:
-          - "{{ host_config_dir }}:/etc/nginx:ro"
-          - "{{ host_content_dir }}:{{ container_content_dir }}:ro"
+          - "{{ config_dir }}:{{ config_dir }}:ro"
+          - "{{ host_media_dir }}:{{ container_content_dir }}:ro"
         env:
           TZ: "Europe/Berlin"
         state: started
