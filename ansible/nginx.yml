@@ -28,6 +28,12 @@
         src: ../configs/nginx/nginx.conf.j2
         dest: "{{ host_config_dir }}/nginx.conf"
 
+    - name: Download mime.types
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/nginx/nginx/master/conf/mime.types
+        dest: "{{ host_config_dir }}/mime.types"
+        mode: '0664'
+
     - name: Add nginx index.html
       ansible.builtin.template:
         src: ../configs/nginx/html/index.html.j2
