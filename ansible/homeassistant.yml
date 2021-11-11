@@ -3,6 +3,7 @@
   hosts: "cluster"
   vars:
     host_config_dir: /etc/homeassistant
+    host_deconz_otau_dir: /etc/deconz/otau
     host_deconz_dir: /opt/deconz
   vars_files:
     - secrets.yml
@@ -18,6 +19,11 @@
         path: "{{ host_deconz_dir }}"
         state: directory
 
+    - name: Ensure {{ host_deconz_otau_dir }} dir exists
+      ansible.builtin.file:
+        path: "{{ host_deconz_otau_dir }}"
+        state: directory
+
     # ansible-galaxy collection install community.docker
     - name: Run deCONZ container
       community.docker.docker_container:
@@ -31,16 +37,17 @@
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
           - "{{ host_deconz_dir }}:/root/.local/share/dresden-elektronik/deCONZ"
+          - "{{ host_deconz_otau_dir }}:/root/otau"
         env:
           TZ: "Europe/Berlin"
           DECONZ_WS_PORT: "8124"
           DECONZ_WEB_PORT: "8125"
-          # DECONZ_VNC_MODE: "1"
-          # DECONZ_VNC_PORT: "8126"
-          # DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
-        devices:
-          - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
-        state: started
+          DECONZ_VNC_MODE: "0"
+          DECONZ_VNC_PORT: "8126"
+          DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
+        # devices:
+        #   - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
+        state: stopped
 
     - name: Ensure {{ host_config_dir }} dir exists
       ansible.builtin.file:
@@ -62,6 +69,8 @@
           - "{{ host_config_dir }}:/config"
         env:
           TZ: "Europe/Berlin"
+        devices:
+          - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
         state: started
 
     # ansible-galaxy collection install community.docker
