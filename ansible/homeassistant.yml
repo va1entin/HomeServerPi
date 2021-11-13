@@ -25,7 +25,7 @@
         state: directory
 
     # ansible-galaxy collection install community.docker
-    - name: Run deCONZ container
+    - name: Download deCONZ container for firmware upgrades
       community.docker.docker_container:
         name: deconz
         image: marthoc/deconz:stable
