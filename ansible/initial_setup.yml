@@ -4,7 +4,7 @@
   vars:
     new_user_name: val
     new_user_groups: [sudo, adm]
-    initial_packages: [ssl-cert, apache2, mariadb-server, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate]
+    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate]
   vars_files:
     - secrets.yml
   tasks:
@@ -43,10 +43,15 @@
         src: ../configs/unattended-upgrades/50unattended-upgrades
         dest: /etc/apt/apt.conf.d/50unattended-upgrades
 
-    - name: Add sshd config
+    # - name: Add sshd config
+    #   ansible.builtin.copy:
+    #     src: ../configs/sshd/sshd_config
+    #     dest: /etc/ssh/sshd_config
+
+    - name: Add sshd config 99deny_pi.conf
       ansible.builtin.copy:
-        src: ../configs/sshd/sshd_config
-        dest: /etc/ssh/sshd_config
+        src: ../configs/sshd/99deny_pi.conf
+        dest: /etc/ssh/sshd_config.d/99deny_pi.conf
 
     - name: Add vimrc
       ansible.builtin.copy:
