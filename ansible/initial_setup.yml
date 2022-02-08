@@ -64,6 +64,15 @@
         password: "{{ vault_initial_setup_new_pi_password }}"
         state: present
 
+    - name: Add cron job - docker prune
+      cron:
+        name: "Docker prune"
+        cron_file: "docker_prune"
+        user: "root"
+        minute: "0"
+        hour: "4"
+        job: 'docker system prune -f --volumes'
+
     - name: Add cron job - reboot on lost internet connection
       cron:
         name: "Reboot on lost internet connection"
