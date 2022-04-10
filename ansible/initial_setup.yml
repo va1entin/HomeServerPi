@@ -64,6 +64,11 @@
         password: "{{ vault_initial_setup_new_pi_password }}"
         state: present
 
+    # ansible-galaxy collection install community.general
+    - name: Set timezone to Europe/Berlin
+      community.general.timezone:
+        name: Europe/Berlin
+
     - name: Add cron job - docker prune
       cron:
         name: "Docker prune"
