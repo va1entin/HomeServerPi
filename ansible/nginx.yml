@@ -8,12 +8,6 @@
     container_content_dir: /media
     nginx_location: /mediavault/
   tasks:
-    - name: Install python-docker and yamllint
-      ansible.builtin.apt:
-        name: "python3-docker,yamllint"
-        force_apt_get: true
-        state: latest
-
     - name: Ensure {{ config_dir }} dir exists
       ansible.builtin.file:
         path: "{{ config_dir }}"
