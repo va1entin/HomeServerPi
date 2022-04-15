@@ -1,28 +1,46 @@
 ---
 - name: Media Server based on minidlna (ReadyMedia) and SFTP
-  hosts: "cluster"
+  hosts: "newpi"
   vars:
     sftp_user_name: mediaserver
+    media_dir: "/home/{{ sftp_user_name }}"
     inotify_max_user_watches: 1048576
   vars_files:
     - secrets.yml
   tasks:
+    - name: Mount SSD by UUID to {{ media_dir }}
+      ansible.posix.mount:
+        path: "{{ media_dir }}"
+        src: UUID=f444743d-f81a-493b-b9a2-cc67b2aded04
+        fstype: ext4
+        opts: "defaults,noatime"
+        state: mounted
+
     - name: Add sftp user
       ansible.builtin.user:
         name: "{{ sftp_user_name }}"
         password: "{{ vault_media_server_sftp_user_password }}"
         state: present
 
+    - name: Make user {{ sftp_user_name }} owner of media dir {{ media_dir }}
+      ansible.builtin.file:
+        path: "{{ media_dir }}"
+        owner: "{{ sftp_user_name }}"
+        group: "{{ sftp_user_name }}"
+        mode: '755'
+        recurse: yes
+        state: directory
+
     - name: Ensure movies dir exists
       ansible.builtin.file:
-        path: /home/{{ sftp_user_name }}/Movies
+        path: "{{ media_dir }}/Movies"
         owner: "{{ sftp_user_name }}"
         group: "{{ sftp_user_name }}"
         state: directory
 
     - name: Ensure series dir exists
       ansible.builtin.file:
-        path: /home/{{ sftp_user_name }}/Series
+        path: "{{ media_dir }}/Series"
         owner: "{{ sftp_user_name }}"
         group: "{{ sftp_user_name }}"
         state: directory
