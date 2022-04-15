@@ -1,6 +1,6 @@
 ---
 - name: HomeAssistant
-  hosts: "cluster"
+  hosts: "newpi"
   vars:
     host_config_dir: /etc/homeassistant
     host_deconz_otau_dir: /etc/deconz/otau
@@ -8,12 +8,6 @@
   vars_files:
     - secrets.yml
   tasks:
-    - name: Install python-docker and yamllint
-      ansible.builtin.apt:
-        name: "python3-docker,yamllint"
-        force_apt_get: true
-        state: latest
-
     - name: Ensure {{ host_deconz_dir }} dir exists
       ansible.builtin.file:
         path: "{{ host_deconz_dir }}"
@@ -28,7 +22,7 @@
     - name: Download deCONZ container for firmware upgrades
       community.docker.docker_container:
         name: deconz
-        image: marthoc/deconz:stable
+        image: deconzcommunity/deconz:stable
         detach: true
         network_mode: host
         restart: true
@@ -36,7 +30,7 @@
         pull: true
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
-          - "{{ host_deconz_dir }}:/root/.local/share/dresden-elektronik/deCONZ"
+          - "{{ host_deconz_dir }}:/opt/deCONZ"
           - "{{ host_deconz_otau_dir }}:/root/otau"
         env:
           TZ: "Europe/Berlin"
@@ -45,8 +39,9 @@
           DECONZ_VNC_MODE: "0"
           DECONZ_VNC_PORT: "8126"
           DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
-        # devices:
-        #   - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
+        devices:
+          - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
+        # state: started
         state: stopped
 
     - name: Ensure {{ host_config_dir }} dir exists
@@ -72,3 +67,4 @@
         devices:
           - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
         state: started
+        # state: stopped
