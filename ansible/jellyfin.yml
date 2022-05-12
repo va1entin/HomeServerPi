@@ -2,6 +2,7 @@
 - name: Jellyfin
   hosts: "newpi"
   vars:
+    jellyfin_version: 10.8.0-beta2
     host_config_dir: /etc/jellyfin
     host_cache_dir: /var/cache/jellyfin
   vars_files:
@@ -21,7 +22,7 @@
     - name: Start Jellyfin container
       community.docker.docker_container:
         name: jellyfin
-        image: jellyfin/jellyfin
+        image: "jellyfin/jellyfin:{{ jellyfin_version }}"
         detach: true
         network_mode: host
         restart: true
