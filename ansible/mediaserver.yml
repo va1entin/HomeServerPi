@@ -1,6 +1,6 @@
 ---
 - name: Media Server based on minidlna (ReadyMedia) and SFTP
-  hosts: "newpi"
+  hosts: "pi4"
   vars:
     sftp_user_name: mediaserver
     media_dir: "/home/{{ sftp_user_name }}"

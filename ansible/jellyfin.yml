@@ -1,6 +1,6 @@
 ---
 - name: Jellyfin
-  hosts: "newpi"
+  hosts: "pi4"
   vars:
     jellyfin_version: 10.8.0-beta2
     host_config_dir: /etc/jellyfin

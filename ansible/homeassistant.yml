@@ -1,6 +1,6 @@
 ---
 - name: HomeAssistant
-  hosts: "newpi"
+  hosts: "pi4"
   vars:
     host_config_dir: /etc/homeassistant
     host_deconz_otau_dir: /etc/deconz/otau
