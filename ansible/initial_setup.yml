@@ -1,8 +1,8 @@
 ---
 - name: Initial setup of raspberry pi
-  hosts: "cluster"
+  hosts: "pis"
   vars:
-    new_user_name: val
+    user_name: val
     new_user_groups: [sudo, adm]
     initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, python3-docker, yamllint]
   vars_files:
@@ -10,19 +10,12 @@
   tasks:
 # Write image to SD card
 # sudo dd bs=4M if=2020-08-20-raspios-buster-armhf.img of=/dev/sdX conv=fsync
-# Add ssh key to default user, password is raspberry
-# ssh-copy-id -i ~/.ssh/id_rsa.pub pi@host
-    - name: Add user
+# Add ssh key to user created with userconf file during initial boot
+# ssh-copy-id -i ~/.ssh/id_rsa.pub user@host
+    - name: Add user to groups
       ansible.builtin.user:
-        name: "{{ new_user_name }}"
+        name: "{{ user_name }}"
         groups: "{{ new_user_groups }}"
-        password: "{{ vault_initial_setup_new_user_password }}"
-        state: present
-
-    - name: Copy ssh ID to new user
-      ansible.posix.authorized_key:
-        user: "{{ new_user_name }}"
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
         state: present
 
     - name: Update apt cache and upgrade all packages, no dist upgrade
@@ -43,26 +36,10 @@
         src: ../configs/unattended-upgrades/50unattended-upgrades
         dest: /etc/apt/apt.conf.d/50unattended-upgrades
 
-    # - name: Add sshd config
-    #   ansible.builtin.copy:
-    #     src: ../configs/sshd/sshd_config
-    #     dest: /etc/ssh/sshd_config
-
-    - name: Add sshd config 99deny_pi.conf
-      ansible.builtin.copy:
-        src: ../configs/sshd/99deny_pi.conf
-        dest: /etc/ssh/sshd_config.d/99deny_pi.conf
-
     - name: Add vimrc
       ansible.builtin.copy:
         src: ../configs/vim/vimrc
         dest: /etc/vim/vimrc
-
-    - name: Change pi's default password
-      ansible.builtin.user:
-        name: pi
-        password: "{{ vault_initial_setup_new_pi_password }}"
-        state: present
 
     # ansible-galaxy collection install community.general
     - name: Set timezone to Europe/Berlin
