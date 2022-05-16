@@ -2,7 +2,7 @@
 - name: Jellyfin
   hosts: "pi4"
   vars:
-    jellyfin_version: 10.8.0-beta2
+    jellyfin_version: 10.8.0-beta3
     host_config_dir: /etc/jellyfin
     host_cache_dir: /var/cache/jellyfin
   vars_files:
