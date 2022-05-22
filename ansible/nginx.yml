@@ -9,6 +9,8 @@
     nginx_location: /mediavault/
     letsencrypt_config_dir: /etc/letsencrypt
     letsencrypt_challenge_dir: /var/www/challenges/
+  vars_files:
+    - secrets.yml
   tasks:
     - name: Ensure dirs exist
       ansible.builtin.file:
