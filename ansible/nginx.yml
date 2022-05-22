@@ -1,6 +1,6 @@
 ---
 - name: Nginx
-  hosts: "cluster"
+  hosts: "pi4"
   vars:
     config_dir: /etc/nginx
     content_dir: "{{ config_dir }}/html"
