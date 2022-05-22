@@ -4,7 +4,7 @@
   vars:
     user_name: val
     new_user_groups: [sudo, adm]
-    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, python3-docker, python3-pip, yamllint]
+    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, python3-docker, python3-pip, yamllint, file]
   vars_files:
     - secrets.yml
   tasks:
