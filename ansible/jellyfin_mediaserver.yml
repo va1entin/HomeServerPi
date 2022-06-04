@@ -1,0 +1,79 @@
+---
+- name: Media server with Jellyfin
+  hosts: "pi4"
+  vars:
+    sftp_user_name: mediaserver
+    media_dir: "/home/{{ sftp_user_name }}"
+    jellyfin_version: 10.8.0-beta3
+    host_config_dir: /etc/jellyfin
+    host_cache_dir: /var/cache/jellyfin
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Mount SSD by UUID to {{ media_dir }}
+      ansible.posix.mount:
+        path: "{{ media_dir }}"
+        src: UUID=f444743d-f81a-493b-b9a2-cc67b2aded04
+        fstype: ext4
+        opts: "defaults,noatime"
+        state: mounted
+
+    - name: Add sftp user
+      ansible.builtin.user:
+        name: "{{ sftp_user_name }}"
+        password: "{{ vault_media_server_sftp_user_password }}"
+        state: present
+
+    - name: Make user {{ sftp_user_name }} is owner of media dir {{ media_dir }}
+      ansible.builtin.file:
+        path: "{{ media_dir }}"
+        owner: "{{ sftp_user_name }}"
+        group: "{{ sftp_user_name }}"
+        mode: '755'
+        recurse: yes
+        state: directory
+
+    - name: Ensure {{ item }} dir exists
+      ansible.builtin.file:
+        path: "{{ item }}"
+        owner: "{{ sftp_user_name }}"
+        group: "{{ sftp_user_name }}"
+        state: directory
+      loop:
+      - "{{ media_dir }}/Concerts"
+      - "{{ media_dir }}/Movies"
+      - "{{ media_dir }}/Music"
+      - "{{ media_dir }}/Series"
+
+    - name: Ensure {{ host_config_dir }} dir exists
+      ansible.builtin.file:
+        path: "{{ host_config_dir }}"
+        state: directory
+
+    - name: Ensure {{ host_cache_dir }} dir exists
+      ansible.builtin.file:
+        path: "{{ host_cache_dir }}"
+        state: directory
+
+    # ansible-galaxy collection install community.docker
+    - name: Start Jellyfin container
+      community.docker.docker_container:
+        name: jellyfin
+        image: "jellyfin/jellyfin:{{ jellyfin_version }}"
+        detach: true
+        network_mode: host
+        restart: true
+        restart_policy: always
+        pull: true
+        volumes:
+          - "/etc/localtime:/etc/localtime:ro"
+          - "{{ host_config_dir }}:/config"
+          - "{{ host_cache_dir }}:/cache"
+        mounts:
+          - source: "/home/mediaserver"
+            target: "/media"
+            read_only: true
+            type: bind
+        env:
+          TZ: "Europe/Berlin"
+        state: started
