@@ -75,7 +75,7 @@
     - name: Run nginx container
       community.docker.docker_container:
         name: nginx
-        image: nginx:stable
+        image: va1entin/nginx-extended
         detach: true
         network_mode: host
         restart: true
@@ -85,7 +85,8 @@
           - "{{ letsencrypt_config_dir }}:{{ letsencrypt_config_dir }}:ro"
           - "{{ letsencrypt_challenge_dir }}:{{ letsencrypt_challenge_dir }}:ro"
           - "{{ config_dir }}:{{ config_dir }}:ro"
-          - "{{ host_media_dir }}:{{ container_content_dir }}:ro"
+          - "{{ html_content_dir }}:/usr/share/nginx/html:ro"
+          - "{{ host_media_dir }}:{{ container_content_dir }}"
         env:
           TZ: "Europe/Berlin"
         state: started
