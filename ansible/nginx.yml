@@ -3,10 +3,8 @@
   hosts: "pi4"
   vars:
     config_dir: /etc/nginx
-    html_content_dir: "{{ config_dir }}/html"
     host_media_dir: /home/mediaserver
     container_content_dir: /media
-    nginx_location: /mediavault/
     letsencrypt_config_dir: /etc/letsencrypt
     letsencrypt_challenge_dir: /var/www/challenges/
   vars_files:
@@ -18,7 +16,6 @@
         state: directory
       loop:
       - "{{ config_dir }}"
-      - "{{ html_content_dir }}"
       - "{{ letsencrypt_config_dir }}"
       - "{{ letsencrypt_challenge_dir }}"
 
@@ -33,16 +30,16 @@
         dest: "{{ config_dir }}/mime.types"
         mode: "0664"
 
-    - name: Add nginx index.html
-      ansible.builtin.template:
-        src: ../configs/nginx/html/index.html.j2
-        dest: "{{ html_content_dir }}/index.html"
-
     - name: Get nginx-autoindex-theme from GitHub
       ansible.builtin.git:
         repo: 'https://github.com/va1entin/nginx-autoindex-theme'
-        dest: "{{ html_content_dir }}/nginx-autoindex-theme"
+        dest: "{{ host_media_dir }}/.nginx-autoindex-theme"
         force: yes
+
+    - name: Add autoindex background image
+      ansible.builtin.copy:
+        src: ../configs/nginx/html/background.png
+        dest: "{{ host_media_dir }}/.background.png"
 
     - name: Get acme_tiny from GitHub
       ansible.builtin.git:
@@ -85,7 +82,6 @@
           - "{{ letsencrypt_config_dir }}:{{ letsencrypt_config_dir }}:ro"
           - "{{ letsencrypt_challenge_dir }}:{{ letsencrypt_challenge_dir }}:ro"
           - "{{ config_dir }}:{{ config_dir }}:ro"
-          - "{{ html_content_dir }}:/usr/share/nginx/html:ro"
           - "{{ host_media_dir }}:{{ container_content_dir }}"
         env:
           TZ: "Europe/Berlin"
