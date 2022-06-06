@@ -1,6 +1,6 @@
 ---
 - name: Setup events_today with mail_dat
-  hosts: "cluster"
+  hosts: "pi4"
   vars:
     events_today_mail_dat_dependencies: [python3-caldav, python3-gnupg]
     caldav_pw_file: "/root/.caldav.pw"
