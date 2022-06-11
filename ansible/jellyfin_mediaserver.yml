@@ -4,7 +4,7 @@
   vars:
     sftp_user_name: mediaserver
     media_dir: "/home/{{ sftp_user_name }}"
-    jellyfin_version: 10.8.0-beta3
+    jellyfin_version: 10.8.0
     host_config_dir: /etc/jellyfin
     host_cache_dir: /var/cache/jellyfin
   vars_files:
@@ -33,7 +33,7 @@
         recurse: yes
         state: directory
 
-    - name: Ensure {{ item }} dir exists
+    - name: Ensure media dirs exist
       ansible.builtin.file:
         path: "{{ item }}"
         owner: "{{ sftp_user_name }}"
@@ -63,7 +63,7 @@
         detach: true
         network_mode: host
         restart: true
-        restart_policy: always
+        restart_policy: unless-stopped
         pull: true
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
