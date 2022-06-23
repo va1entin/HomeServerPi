@@ -2,6 +2,7 @@
 - name: Nginx
   hosts: "pi4"
   vars:
+    nginx_version: 1.23
     config_dir: /etc/nginx
     host_media_dir: /home/mediaserver
     container_content_dir: /media
@@ -71,17 +72,17 @@
     - name: Run nginx container
       community.docker.docker_container:
         name: nginx
-        image: va1entin/nginx-extended
+        image: "nginx:{{ nginx_version }}"
         detach: true
         network_mode: host
         restart: true
-        restart_policy: always
+        restart_policy: unless-stopped
         pull: true
         volumes:
           - "{{ letsencrypt_config_dir }}:{{ letsencrypt_config_dir }}:ro"
           - "{{ letsencrypt_challenge_dir }}:{{ letsencrypt_challenge_dir }}:ro"
           - "{{ config_dir }}:{{ config_dir }}:ro"
-          - "{{ host_media_dir }}:{{ container_content_dir }}"
+          - "{{ host_media_dir }}:{{ container_content_dir }}:ro"
         env:
           TZ: "Europe/Berlin"
         state: started
