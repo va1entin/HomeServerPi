@@ -4,7 +4,7 @@
   vars:
     sftp_user_name: mediaserver
     media_dir: "/home/{{ sftp_user_name }}"
-    jellyfin_version: 10.8.1
+    jellyfin_version: 10.8.4
     host_config_dir: /etc/jellyfin
     host_cache_dir: /var/cache/jellyfin
   vars_files:
