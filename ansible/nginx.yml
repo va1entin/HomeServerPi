@@ -64,7 +64,7 @@
         dest: "{{ letsencrypt_config_dir }}/domain.csr"
 
     # - name: Get initial LE cert
-    #   ansible.builtin.command: '/root/tools/letsencrypt_renewal.sh'
+    #   ansible.builtin.command: '/root/tools/letsencrypt_renewal/letsencrypt_renewal.sh'
 
     # ansible-galaxy collection install community.docker
     # to generate htpasswd:
@@ -95,4 +95,4 @@
         minute: "0"
         hour: "0"
         day: "1"
-        job: '/root/tools/letsencrypt_renewal.sh'
+        job: '/root/tools/letsencrypt_renewal/letsencrypt_renewal.sh'
