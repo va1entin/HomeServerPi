@@ -1,0 +1,39 @@
+---
+- name: Jellyfin
+  hosts: "pi4"
+  vars:
+    media_dir: "/mnt/media/files/val/files/Media Vault"
+    jellyfin_version: 10.8.7
+    host_config_dir: /etc/jellyfin
+    host_cache_dir: /var/cache/jellyfin
+  tasks:
+    - name: Ensure {{ host_config_dir }} dir exists
+      ansible.builtin.file:
+        path: "{{ host_config_dir }}"
+        state: directory
+
+    - name: Ensure {{ host_cache_dir }} dir exists
+      ansible.builtin.file:
+        path: "{{ host_cache_dir }}"
+        state: directory
+
+    # ansible-galaxy collection install community.docker
+    - name: Start Jellyfin container
+      community.docker.docker_container:
+        name: jellyfin
+        image: "jellyfin/jellyfin:{{ jellyfin_version }}"
+        detach: true
+        network_mode: host
+        restart: true
+        restart_policy: unless-stopped
+        pull: true
+        volumes:
+          - "/etc/localtime:/etc/localtime:ro"
+          - "{{ host_config_dir }}:/config"
+          - "{{ host_cache_dir }}:/cache"
+        mounts:
+          - source: "{{ media_dir }}"
+            target: "/mnt/media"
+            read_only: true
+            type: bind
+        state: started
