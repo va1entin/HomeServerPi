@@ -4,8 +4,8 @@
   vars:
     nginx_version: 1.23
     config_dir: /etc/nginx
-    host_media_dir: /home/mediaserver
-    container_content_dir: /media
+    # host_media_dir: /home/mediaserver
+    # container_content_dir: /media
     letsencrypt_config_dir: /etc/letsencrypt
     letsencrypt_challenge_dir: /var/www/challenges/
   vars_files:
@@ -30,16 +30,16 @@
         src: ../configs/nginx/mime.types
         dest: "{{ config_dir }}/mime.types"
 
-    - name: Get nginx-autoindex-theme from GitHub
-      ansible.builtin.git:
-        repo: 'https://github.com/va1entin/nginx-autoindex-theme'
-        dest: "{{ host_media_dir }}/.nginx-autoindex-theme"
-        force: yes
+    # - name: Get nginx-autoindex-theme from GitHub
+    #   ansible.builtin.git:
+    #     repo: 'https://github.com/va1entin/nginx-autoindex-theme'
+    #     dest: "{{ host_media_dir }}/.nginx-autoindex-theme"
+    #     force: yes
 
-    - name: Add autoindex background image
-      ansible.builtin.copy:
-        src: ../configs/nginx/html/background.png
-        dest: "{{ host_media_dir }}/.background.png"
+    # - name: Add autoindex background image
+    #   ansible.builtin.copy:
+    #     src: ../configs/nginx/html/background.png
+    #     dest: "{{ host_media_dir }}/.background.png"
 
     - name: Get acme_tiny from GitHub
       ansible.builtin.git:
@@ -82,7 +82,7 @@
           - "{{ letsencrypt_config_dir }}:{{ letsencrypt_config_dir }}:ro"
           - "{{ letsencrypt_challenge_dir }}:{{ letsencrypt_challenge_dir }}:ro"
           - "{{ config_dir }}:{{ config_dir }}:ro"
-          - "{{ host_media_dir }}:{{ container_content_dir }}:ro"
+          # - "{{ host_media_dir }}:{{ container_content_dir }}:ro"
         env:
           TZ: "Europe/Berlin"
         state: started

@@ -23,6 +23,5 @@
         name: "Update DynDns at cloudflare"
         cron_file: "cloudflare_update_record"
         user: "root"
-        minute: "0"
-        hour: "*/4"
+        minute: "*/5"
         job: "cd /root/tools/cloudflare_update_record/; ./cloudflare_update_record.py -4"
