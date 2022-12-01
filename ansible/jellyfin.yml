@@ -3,7 +3,7 @@
   hosts: "pi4"
   vars:
     media_dir: "/mnt/media/files/val/files/Media Vault"
-    jellyfin_version: 10.8.7
+    jellyfin_version: 10.8.8
     host_config_dir: /etc/jellyfin
     host_cache_dir: /var/cache/jellyfin
   tasks:
