@@ -25,10 +25,10 @@
         src: ../configs/nginx/nginx.conf.j2
         dest: "{{ config_dir }}/nginx.conf"
 
-    - name: Add mime.types
-      ansible.builtin.copy:
-        src: ../configs/nginx/mime.types
-        dest: "{{ config_dir }}/mime.types"
+    # - name: Add mime.types
+    #   ansible.builtin.copy:
+    #     src: ../configs/nginx/mime.types
+    #     dest: "{{ config_dir }}/mime.types"
 
     # - name: Get nginx-autoindex-theme from GitHub
     #   ansible.builtin.git:
