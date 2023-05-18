@@ -4,7 +4,7 @@
   vars:
     syncthing_version: "1.22.2"
     host_sync_dir: "/var/syncthing"
-    vault_dir: "/home/mediaserver"
+    vault_dir: "/mnt/media/files/val/files/Media Vault"
     container_sync_dir: "/var/syncthing"
   tasks:
     - name: "Ensure {{ host_sync_dir }} dir exists"
