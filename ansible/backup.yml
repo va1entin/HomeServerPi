@@ -1,0 +1,21 @@
+---
+- name: Add backup tools and configs
+  hosts: "pi4"
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Add az_backup.sh
+      ansible.builtin.template:
+        src: ../scripts/azure/az_backup.sh.j2
+        dest: "/root/az_backup.sh"
+        mode: "0700"
+
+    - name: Add cron job - AZ vault backup
+      cron:
+        name: "AZ Vault Backup"
+        cron_file: "az_vault_backup"
+        user: "root"
+        minute: "0"
+        hour: "3"
+        weekday: "6"
+        job: '/root/az_backup.sh'

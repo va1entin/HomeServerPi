@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+function az () {
+    docker run --rm -v azcli:/root/.azure mcr.microsoft.com/azure-cli az "$@";
+}
+
+echo "Checking Azure access..."
+if ! az account list | jq -e '.[] | select(.id == "{{ vault_az_subscription_id }}")' > /dev/null; then
+    echo "Subscription {{ vault_az_subscription_id }} not found"
+    echo "No Azure login! Please run 'docker run --rm -v azcli:/root/.azure mcr.microsoft.com/azure-cli az login' and try again."
+    exit 1
+fi
+
+sas_expiry_date=$(date -d "3 days" "+%Y-%m-%d")
+
+echo "Generating SAS token for {{ vault_storage_container_name }} with expiry date $sas_expiry_date"
+sas_token=$(az storage container generate-sas --account-name {{ vault_storage_account_name }} --name {{ vault_storage_container_name }} --permissions acdlrw --expiry "$sas_expiry_date" --auth-mode login --as-user --subscription {{ vault_az_subscription_id }})
+
+echo "Generating SAS URL..."
+sas_url=$(echo "https://{{ vault_storage_account_name }}.blob.core.windows.net/{{ vault_storage_container_name }}?$sas_token" | sed 's/"//g')
+echo "SAS URL: $sas_url"
+
+echo "Processing folders..."
+for folder in $(ls /mnt/media/files/val/files/Media\ Vault/); do
+    echo "Processing /mnt/media/files/val/files/Media Vault/$folder"
+    rclone --azureblob-sas-url "$sas_url" -P sync "/mnt/media/files/val/files/Media Vault/$folder" "azure:{{ vault_storage_container_name }}/$folder"
+    echo ""
+done

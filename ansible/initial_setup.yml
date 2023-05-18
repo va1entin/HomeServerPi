@@ -4,7 +4,7 @@
   vars:
     user_name: val
     new_user_groups: [sudo, adm]
-    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, docker-compose, python3-docker, python3-pip, yamllint, file, rclone]
+    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, docker-compose, python3-docker, python3-pip, yamllint, file, rclone, jq]
   vars_files:
     - secrets.yml
   tasks:
@@ -53,7 +53,7 @@
         user: "root"
         minute: "0"
         hour: "4"
-        job: 'docker system prune -f --volumes'
+        job: 'docker system prune -f'
 
     - name: Add cron job - reboot on lost internet connection
       cron:
