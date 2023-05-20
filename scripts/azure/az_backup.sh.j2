@@ -18,7 +18,7 @@ sas_token=$(az storage container generate-sas --account-name {{ vault_storage_ac
 
 echo "Generating SAS URL..."
 sas_url=$(echo "https://{{ vault_storage_account_name }}.blob.core.windows.net/{{ vault_storage_container_name }}?$sas_token" | sed 's/"//g')
-echo "SAS URL: $sas_url"
+# echo "SAS URL: $sas_url"
 
 echo "Processing folders..."
 for folder in $(ls /mnt/media/files/val/files/Media\ Vault/); do
