@@ -2,7 +2,7 @@
 - name: Nginx
   hosts: "pi4"
   vars:
-    nginx_version: 1.23
+    nginx_version: 1.25
     config_dir: /etc/nginx
     # host_media_dir: /home/mediaserver
     # container_content_dir: /media
