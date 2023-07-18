@@ -40,7 +40,8 @@
           DECONZ_VNC_PORT: "8126"
           DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
         devices:
-          - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
+          - "/dev/ttyACM0:/dev/ttyACM0"
+          #- "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
         # state: started
         state: stopped
 
@@ -53,7 +54,7 @@
     - name: Run HomeAssistant container
       community.docker.docker_container:
         name: homeassistant
-        image: homeassistant/raspberrypi4-homeassistant:stable
+        image: ghcr.io/home-assistant/home-assistant:stable
         privileged: true
         detach: true
         network_mode: host
@@ -65,6 +66,7 @@
         env:
           TZ: "Europe/Berlin"
         devices:
-          - "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
+          - "/dev/ttyACM0:/dev/ttyACM0"
+          #- "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
         state: started
         # state: stopped
