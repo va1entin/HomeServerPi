@@ -1,0 +1,51 @@
+---
+- name: Traefik
+  hosts: "pi4"
+  vars:
+    traefik_version: "2.10"
+    letsencrypt_dir: "/etc/letsencrypt"
+    network_name: "proxy"
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: "Ensure {{ letsencrypt_dir }} dir exists"
+      ansible.builtin.file:
+        path: "{{ letsencrypt_dir }}"
+        state: directory
+
+    - name: Add proxy docker network
+      docker_network:
+        name: "{{ network_name }}"
+        internal: no
+
+    # ansible-galaxy collection install community.docker
+    - name: Start Traefik container
+      community.docker.docker_container:
+        name: traefik
+        image: "traefik:{{ traefik_version }}"
+        detach: true
+        restart: true
+        restart_policy: unless-stopped
+        pull: true
+        volumes:
+          - "/etc/localtime:/etc/localtime:ro"
+          - "/var/run/docker.sock:/var/run/docker.sock:ro"
+          - "{{ letsencrypt_dir }}:/letsencrypt"
+        networks:
+          - name: proxy
+        ports:
+          - "80:80"
+          - "443:443"
+        command:
+          - "--log.level=DEBUG"
+          - "--providers.docker=true"
+          - "--providers.docker.exposedbydefault=false"
+          - "--entrypoints.web.address=:80"
+          - "--entrypoints.websecure.address=:443"
+          - "--certificatesresolvers.vault.acme.httpchallenge=true"
+          - "--certificatesresolvers.vault.acme.httpchallenge.entrypoint=web"
+          #- "--certificatesresolvers.vault.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+          - "--certificatesresolvers.vault.acme.email={{ vault_letsencrypt_email }}"
+          - "--certificatesresolvers.vault.acme.storage=/letsencrypt/acme.json"
+          - "--providers.docker.network={{ network_name }}"
+        state: started
