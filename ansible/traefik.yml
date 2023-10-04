@@ -13,6 +13,8 @@
         path: "{{ letsencrypt_dir }}"
         state: directory
 
+    # when using this from a docker compose file make sure to add name
+    # https://docs.docker.com/compose/networking/#use-a-pre-existing-network
     - name: Add proxy docker network
       docker_network:
         name: "{{ network_name }}"
