@@ -21,7 +21,7 @@
         src: "~/music/Another Brick in the Wall (The Wall) - Pink Floyd.opus"
         dest: /root/another_brick_in_the_wall.opus
 
-    # Bluetooh Audio, based on https://github.com/nicokaiser/rpi-audio-receiver/blob/main/install-bluetooth.sh at f594f4e
+    # Bluetooth Audio, based on https://github.com/nicokaiser/rpi-audio-receiver/blob/main/install-bluetooth.sh at f594f4e
     - name: Install alsa and bluetooth dependencies
       ansible.builtin.apt:
         name: "{{ alsa_bluetooth_dependencies }}"
