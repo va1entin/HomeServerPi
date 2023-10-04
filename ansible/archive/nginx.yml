@@ -1,0 +1,98 @@
+---
+- name: Nginx
+  hosts: "pi4"
+  vars:
+    nginx_version: 1.24
+    config_dir: /etc/nginx
+    # host_media_dir: /home/mediaserver
+    # container_content_dir: /media
+    letsencrypt_config_dir: /etc/letsencrypt
+    letsencrypt_challenge_dir: /var/www/challenges/
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Ensure dirs exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+      - "{{ config_dir }}"
+      - "{{ letsencrypt_config_dir }}"
+      - "{{ letsencrypt_challenge_dir }}"
+
+    - name: Add nginx config
+      ansible.builtin.template:
+        src: ../configs/nginx/nginx.conf.j2
+        dest: "{{ config_dir }}/nginx.conf"
+
+    # - name: Add mime.types
+    #   ansible.builtin.copy:
+    #     src: ../configs/nginx/mime.types
+    #     dest: "{{ config_dir }}/mime.types"
+
+    # - name: Get nginx-autoindex-theme from GitHub
+    #   ansible.builtin.git:
+    #     repo: 'https://github.com/va1entin/nginx-autoindex-theme'
+    #     dest: "{{ host_media_dir }}/.nginx-autoindex-theme"
+    #     force: yes
+
+    # - name: Add autoindex background image
+    #   ansible.builtin.copy:
+    #     src: ../configs/nginx/html/background.png
+    #     dest: "{{ host_media_dir }}/.background.png"
+
+    - name: Get acme_tiny from GitHub
+      ansible.builtin.git:
+        repo: 'https://github.com/diafygi/acme-tiny'
+        dest: "/root/acme_tiny"
+        force: yes
+        version: 5.0.1
+
+    - name: Add LetsEncrypt account key
+      ansible.builtin.copy:
+        src: ../configs/nginx/letsencrypt/account.key
+        dest: "{{ letsencrypt_config_dir }}/account.key"
+
+    - name: Add LetsEncrypt domain key
+      ansible.builtin.copy:
+        src: ../configs/nginx/letsencrypt/domain.key
+        dest: "{{ letsencrypt_config_dir }}/domain.key"
+
+    - name: Add LetsEncrypt csr
+      ansible.builtin.copy:
+        src: ../configs/nginx/letsencrypt/domain.csr
+        dest: "{{ letsencrypt_config_dir }}/domain.csr"
+
+    # - name: Get initial LE cert
+    #   ansible.builtin.command: '/root/tools/letsencrypt_renewal/letsencrypt_renewal.sh'
+
+    # ansible-galaxy collection install community.docker
+    # to generate htpasswd:
+    # apt install -y apache2-utils && htpasswd -c /etc/nginx/.htpasswd user1
+    - name: Run nginx container
+      community.docker.docker_container:
+        name: nginx
+        image: "nginx:{{ nginx_version }}"
+        detach: true
+        network_mode: host
+        restart: true
+        restart_policy: unless-stopped
+        pull: true
+        volumes:
+          - "{{ letsencrypt_config_dir }}:{{ letsencrypt_config_dir }}:ro"
+          - "{{ letsencrypt_challenge_dir }}:{{ letsencrypt_challenge_dir }}:ro"
+          - "{{ config_dir }}:{{ config_dir }}:ro"
+          # - "{{ host_media_dir }}:{{ container_content_dir }}:ro"
+        env:
+          TZ: "Europe/Berlin"
+        state: started
+
+    - name: Add cron job - certificate renewal
+      cron:
+        name: "LE renewal"
+        cron_file: "le_renewal"
+        user: "root"
+        minute: "0"
+        hour: "0"
+        day: "1"
+        job: '/root/tools/letsencrypt_renewal/letsencrypt_renewal.sh'
