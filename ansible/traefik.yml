@@ -49,3 +49,20 @@
           - "--certificatesresolvers.vault.acme.storage=/letsencrypt/acme.json"
           - "--providers.docker.network={{ network_name }}"
         state: started
+
+    # - name: Start whoami container
+    #   community.docker.docker_container:
+    #     name: whoami:
+    #     image: "traefik/whoami"
+    #     detach: true
+    #     restart: true
+    #     restart_policy: unless-stopped
+    #     pull: true
+    #     networks:
+    #       - name: proxy
+    #     labels:
+    #       - "traefik.enable=false"
+    #       - "traefik.http.routers.whoami.rule=Host(`{{ vault_server_name }}`)"
+    #       - "traefik.http.routers.whoami.entrypoints=websecure"
+    #       - "traefik.http.routers.whoami.tls.certresolver=vault"
+    #     state: started
