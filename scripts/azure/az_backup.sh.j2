@@ -23,6 +23,6 @@ sas_url=$(echo "https://{{ vault_storage_account_name }}.blob.core.windows.net/{
 echo "Processing folders..."
 for folder in $(ls /mnt/media/files/val/files/Media\ Vault/); do
     echo "Processing /mnt/media/files/val/files/Media Vault/$folder"
-    rclone --azureblob-sas-url "$sas_url" -P sync "/mnt/media/files/val/files/Media Vault/$folder" "azure:{{ vault_storage_container_name }}/$folder"
+    rclone --azureblob-sas-url "$sas_url" --azureblob-archive-tier-delete -P sync "/mnt/media/files/val/files/Media Vault/$folder" "azure:{{ vault_storage_container_name }}/$folder"
     echo ""
 done
