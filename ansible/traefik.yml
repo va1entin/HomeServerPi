@@ -2,7 +2,7 @@
 - name: Traefik
   hosts: "pi4"
   vars:
-    traefik_version: "2.10"
+    traefik_version: "2.10.5"
     letsencrypt_dir: "/etc/letsencrypt"
     network_name: "proxy"
   vars_files:
