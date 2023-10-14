@@ -8,8 +8,9 @@
   vars_files:
     - secrets.yml
   tasks:
-# Write image to SD card
-# sudo dd bs=4M if=2020-08-20-raspios-buster-armhf.img of=/dev/sdX conv=fsync
+# Write image to SD using rpi-imager from Debian 12 onwards because wpa_supplicant is not working anymore
+## Write image to SD card (Debian 11 and older)
+## sudo dd bs=4M if=2020-08-20-raspios-buster-armhf.img of=/dev/sdX conv=fsync
 # Add ssh key to user created with userconf file during initial boot
 # ssh-copy-id -i ~/.ssh/id_rsa.pub user@host
     - name: Add user to groups
