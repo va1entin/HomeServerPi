@@ -1,0 +1,39 @@
+---
+- name: Caddy
+  hosts: "pi4"
+  vars:
+    caddy_version: "2.7.6-alpine"
+    network_name: "caddy"
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: "Render and copy Caddyfile"
+      ansible.builtin.template:
+        src: ../configs/caddy/Caddyfile.j2
+        dest: "/root/caddy/Caddyfile"
+        mode: "0700"
+
+    # when using this from a docker compose file make sure to add name
+    # https://docs.docker.com/compose/networking/#use-a-pre-existing-network
+    - name: Add proxy docker network
+      docker_network:
+        name: "{{ network_name }}"
+        internal: no
+
+    - name: Start Caddy container
+      community.docker.docker_container:
+        name: caddy
+        image: "caddy:{{ caddy_version }}"
+        detach: true
+        restart: true
+        restart_policy: unless-stopped
+        pull: true
+        volumes:
+          - "/etc/localtime:/etc/localtime:ro"
+          - "/root/caddy/Caddyfile:/etc/caddy/Caddyfile:ro"
+        networks:
+          - name: "{{ network_name }}"
+        ports:
+          - "80:80"
+          - "443:443"
+        state: started

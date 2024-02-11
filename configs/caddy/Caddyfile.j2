@@ -1,0 +1,25 @@
+#{
+#  log
+#  servers {
+#    log_credentials
+#  }
+#}
+
+{{ vault_server_name }}
+
+basicauth {
+{% for user in vault_gossa_users %}
+  {{ user.name }} {{ user.password }}
+{% endfor %}
+}
+
+{% for user in vault_gossa_users %}
+@{{ user.name }}auth {
+  vars {http.auth.user.id} {{ user.name }}
+}
+handle @{{ user.name }}auth {
+  reverse_proxy gossa:800{{ loop.index }}
+}
+{% endfor %}
+
+log

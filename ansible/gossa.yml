@@ -1,0 +1,69 @@
+---
+- name: Gossa
+  hosts: "pi4"
+  vars:
+    gossa_dir: "/root/gossa"
+    data_dir: "/mnt/media/gossa"
+    vault_dir: "/mnt/media/vault"
+    network_name: "caddy"
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: "Ensure {{ data_dir }} dir exists"
+      ansible.builtin.file:
+        path: "{{ data_dir }}"
+        state: directory
+
+    - name: "Render and copy Gossa entrypoint script"
+      ansible.builtin.template:
+        src: ../configs/gossa/start-gossa.sh.j2
+        dest: "/root/gossa/start-gossa.sh"
+        mode: "0700"
+
+    - name: "Copy Gossa executable"
+      ansible.builtin.copy:
+        src: "../configs/gossa/gossa-linux-arm"
+        dest: "/root/gossa/gossa-linux-arm"
+        mode: "preserve"
+
+    - name: "Copy Gossa Dockerfile"
+      ansible.builtin.copy:
+        src: "../configs/gossa/Dockerfile"
+        dest: "/root/gossa/Dockerfile"
+
+    - name: "Build Gossa container image"
+      community.docker.docker_image:
+        name: "gossa"
+        source: build
+        build:
+          path: "{{ gossa_dir }}"
+          pull: true
+        force_source: true
+        force_tag: true
+        tag: "latest"
+        state: present
+
+    - name: Add proxy docker network
+      docker_network:
+        name: "{{ network_name }}"
+        internal: no
+
+    - name: "Start Gossa container"
+      community.docker.docker_container:
+        name: gossa
+        image: "gossa:latest"
+        detach: true
+        restart: true
+        restart_policy: unless-stopped
+        pull: false
+        volumes:
+          - "/etc/localtime:/etc/localtime:ro"
+          - "{{ data_dir }}:/data"
+          - "{{ vault_dir }}:/vault"
+        #network_mode: "host"
+        networks:
+          - name: "{{ network_name }}"
+        ports:
+          - "8001:8001"
+          - "8002:8002"
+        state: started
