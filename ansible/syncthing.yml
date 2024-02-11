@@ -27,7 +27,7 @@
           - "{{ host_sync_dir }}:{{ container_sync_dir }}"
           - "{{ vault_dir }}:{{ container_sync_dir }}/vault"
         env:
-          STGUIADDRESS: ""
+          STGUIADDRESS: "" # fall back to 127.0.0.1, see https://github.com/syncthing/syncthing/blob/main/README-Docker.md#gui-security
           PUID: "33"
           PGID: "1001"
         state: started
