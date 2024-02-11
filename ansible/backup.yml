@@ -18,4 +18,4 @@
         minute: "0"
         hour: "3"
         weekday: "6"
-        job: '/root/az_backup.sh | tee /tmp/az_backup.log'
+        job: '/root/az_backup.sh | tee --append /tmp/az_backup.log'
