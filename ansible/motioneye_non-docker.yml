@@ -22,6 +22,18 @@
     - debug:
         var: motioneye_init_output
 
+    - name: Change motioneye systemd service user to root in systemd service file
+      ansible.builtin.replace:
+        path: /etc/systemd/system/motioneye.service
+        regexp: 'User=motion'
+        replace: 'User=root'
+
+    - name: Change port from 8765 to 80 in motioneye config
+      ansible.builtin.replace:
+        path: /etc/motioneye/motioneye.conf
+        regexp: 'port 8765'
+        replace: 'port 80'
+
     - name: Stop and disable motion service
       ansible.builtin.systemd:
         name: motion
@@ -31,6 +43,7 @@
     - name: Restart motioneye service
       ansible.builtin.systemd:
         name: motioneye
+        daemon_reload: yes
         state: restarted
 
     - name: Add drive cleanup script
