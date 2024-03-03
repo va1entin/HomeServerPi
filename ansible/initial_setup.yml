@@ -4,16 +4,16 @@
   vars:
     #user_name: val
     #new_user_groups: [sudo, adm]
-    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, docker-compose, python3-docker, python3-pip, yamllint, file, rclone, jq]
+    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, docker-compose, python3-docker, python3-pip, yamllint, file, rclone, jq, curl]
   vars_files:
     - secrets.yml
   tasks:
-# Write image to SD using rpi-imager from Debian 12 onwards because wpa_supplicant is not working anymore
-## Write image to SD card (Debian 11 and older)
+# Write image to SD using rpi-imager from bookworm onwards because wpa_supplicant is not working anymore
+## Write image to SD card (buster and older)
 ## sudo dd bs=4M if=2020-08-20-raspios-buster-armhf.img of=/dev/sdX conv=fsync
 # Add ssh key to user created with userconf file during initial boot
 # ssh-copy-id -i ~/.ssh/id_rsa.pub user@host
-    # not required anymore with bookworm/rpi imager setup
+    # not required anymore with bullseye+ and rpi imager setup
     # - name: Add user to groups
     #   ansible.builtin.user:
     #     name: "{{ user_name }}"
