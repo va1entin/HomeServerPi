@@ -7,7 +7,7 @@
 
 {{ vault_server_name }}
 
-basicauth {
+basic_auth {
 {% for user in vault_gossa_users %}
   {{ user.name }} {{ user.password }}
 {% endfor %}
