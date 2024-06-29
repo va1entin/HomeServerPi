@@ -1,75 +1,24 @@
 ---
-- name: HifiBerry & Bluetooth Audio
-  hosts: "cluster"
-  vars:
-    alsa_bluetooth_dependencies: [alsa-base, alsa-utils, bluealsa, bluez-tools]
+- name: HifiBerry & Bluetooth Audio fixes and customziations
+  hosts: "pi4"
   tasks:
-    # HifiBerry, see https://www.hifiberry.com/docs/software/configuring-linux-3-18-x/
-    - name: Add modified /boot/config.txt
-      ansible.builtin.copy:
-        src: ../configs/boot/config.txt
-        dest: /boot/config.txt
+    - name: Wait for confirmation that rpi-audio-receiver scripts were run
+      ansible.builtin.pause:
+        prompt: "Please run the rpi-audio-receiver scripts before continuing: https://github.com/nicokaiser/rpi-audio-receiver/blob/a75cd56c8464a22c37ca4f215d6088a023565781 Press any key to continue or Ctrl+C to abort..."
+        echo: no
+    # for Hifiberry reference https://www.hifiberry.com/docs/software/configuring-linux-3-18-x/
 
-    - name: Install mplayer to test audio playback
-      ansible.builtin.apt:
-        name: "mplayer"
-        force_apt_get: true
-        state: latest
+    - name: Add noaudio to dtoverlay=vc4-kms-v3d to disable HDMI audio
+      ansible.builtin.replace:
+        path: /boot/config.txt
+        regexp: '^dtoverlay=vc4-kms-v3d$'
+        replace: 'dtoverlay=vc4-kms-v3d,noaudio'
 
-    - name: Add test song
-      ansible.builtin.copy:
-        src: "~/music/Another Brick in the Wall (The Wall) - Pink Floyd.opus"
-        dest: /root/another_brick_in_the_wall.opus
+    # Connect sounds
 
-    # Bluetooth Audio, based on https://github.com/nicokaiser/rpi-audio-receiver/blob/main/install-bluetooth.sh at f594f4e
-    - name: Install alsa and bluetooth dependencies
-      ansible.builtin.apt:
-        name: "{{ alsa_bluetooth_dependencies }}"
-        force_apt_get: true
-        state: latest
-
-    - name: Add /etc/bluetooth/main.conf
-      ansible.builtin.copy:
-        src: ../configs/bluetooth/main.conf
-        dest: /etc/bluetooth/main.conf
-
-    - name: Add systemd service unit file for bt-agent
-      ansible.builtin.copy:
-        src: ../configs/bluetooth/bt-agent.service
-        dest: /etc/systemd/system/bt-agent.service
-
-    - name: Enable and start bt-agent service
-      ansible.builtin.systemd:
-        name: bt-agent
-        enabled: true
-        state: restarted
-
-    - name: Add modified /lib/modprobe.d/aliases.conf
-      ansible.builtin.copy:
-        src: ../configs/bluetooth/aliases.conf
-        dest: /lib/modprobe.d/aliases.conf
-
-    - name: Ensure /etc/systemd/system/bluealsa.service.d dir exists
-      ansible.builtin.file:
-        path: /etc/systemd/system/bluealsa.service.d
-        state: directory
-
-    - name: Add systemd service unit override file for bluealsa
-      ansible.builtin.copy:
-        src: ../configs/bluetooth/bluealsa_override.conf
-        dest: /etc/systemd/system/bluealsa.service.d/override.conf
-
-    - name: Add systemd service unit file for bluealsa-aplay
-      ansible.builtin.copy:
-        src: ../configs/bluetooth/bluealsa-aplay.service
-        dest: /etc/systemd/system/bluealsa-aplay.service
-
-    - name: Enable and start bluealsa-aplay service
-      ansible.builtin.systemd:
-        name: bluealsa-aplay
-        enabled: true
-        daemon_reload: true
-        state: restarted
+    - name: Print message about configuring connect sounds
+      ansible.builtin.debug:
+        msg: Going to add custom connect sounds. You must adapt the bluetooth-udev script for this to (maybe) work https://github.com/nicokaiser/rpi-audio-receiver/wiki/Bluetooth-connect-sounds
 
     - name: Ensure /usr/local/share/sounds/__custom dir exists
       ansible.builtin.file:
@@ -86,16 +35,9 @@
         src: ../ignore/bluetooth/device-removed.wav
         dest: /usr/local/share/sounds/__custom/device-removed.wav
 
-    - name: Add bluetooth udev script
-      ansible.builtin.copy:
-        src: ../scripts/bluetooth/bluetooth-udev
-        dest: /usr/local/bin/bluetooth-udev
-        mode: 755
-
-    - name: Add bluetooth udev rules
-      ansible.builtin.copy:
-        src: ../configs/bluetooth/99-bluetooth-udev.rules
-        dest: /etc/udev/rules.d/99-bluetooth-udev.rules
+    - name: Print message about testing audio output
+      ansible.builtin.debug:
+        msg: Test audio output with `aplay /usr/local/share/sounds/__custom/device-added.wav`
 
     # - name: Reboot
     #  ansible.builtin.reboot:
