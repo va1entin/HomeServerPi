@@ -12,6 +12,14 @@
         path: "{{ host_sync_dir }}"
         state: directory
 
+    - name: Add cron job - make sure media drive stays mounted
+      cron:
+        name: "Remount media drive"
+        cron_file: "remount_media_drive"
+        user: "root"
+        minute: "*/1"
+        job: 'mountpoint -q /mnt/media || mount /mnt/media'
+
     # ansible-galaxy collection install community.docker
     - name: Start Syncthing container
       community.docker.docker_container:
