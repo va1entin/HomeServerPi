@@ -22,8 +22,8 @@
 
     - name: "Copy Gossa executable"
       ansible.builtin.copy:
-        src: "../configs/gossa/gossa-linux-arm"
-        dest: "/root/gossa/gossa-linux-arm"
+        src: "../configs/gossa/gossa-linux-arm64"
+        dest: "/root/gossa/gossa-linux-arm64"
         mode: "preserve"
 
     - name: "Copy Gossa Dockerfile"
