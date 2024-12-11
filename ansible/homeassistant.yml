@@ -33,7 +33,6 @@
           - "{{ host_deconz_dir }}:/opt/deCONZ"
           - "{{ host_deconz_otau_dir }}:/root/otau"
         env:
-          TZ: "Europe/Berlin"
           DECONZ_WS_PORT: "8124"
           DECONZ_WEB_PORT: "8125"
           DECONZ_VNC_MODE: "0"
@@ -62,9 +61,8 @@
         restart_policy: unless-stopped
         pull: true
         volumes:
+          - "/etc/localtime:/etc/localtime:ro"
           - "{{ host_config_dir }}:/config"
-        env:
-          TZ: "Europe/Berlin"
         devices:
           - "/dev/ttyACM0:/dev/ttyACM0"
           #- "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
