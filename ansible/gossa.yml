@@ -13,23 +13,27 @@
       ansible.builtin.file:
         path: "{{ data_dir }}"
         state: directory
+      become: yes
 
     - name: "Render and copy Gossa entrypoint script"
       ansible.builtin.template:
         src: ../configs/gossa/start-gossa.sh.j2
         dest: "/root/gossa/start-gossa.sh"
         mode: "0700"
+      become: yes
 
     - name: "Copy Gossa executable"
       ansible.builtin.copy:
         src: "../configs/gossa/gossa-linux-arm64"
         dest: "/root/gossa/gossa-linux-arm64"
-        mode: "preserve"
+        mode: "0755"
+      become: yes
 
     - name: "Copy Gossa Dockerfile"
       ansible.builtin.copy:
         src: "../configs/gossa/Dockerfile"
         dest: "/root/gossa/Dockerfile"
+      become: yes
 
     - name: "Build Gossa container image"
       community.docker.docker_image:
@@ -42,11 +46,13 @@
         force_tag: true
         tag: "latest"
         state: present
+      become: yes
 
     - name: Add proxy docker network
       docker_network:
         name: "{{ network_name }}"
         internal: no
+      become: yes
 
     - name: "Start Gossa container"
       community.docker.docker_container:
@@ -67,3 +73,4 @@
           - "8001:8001"
           - "8002:8002"
         state: started
+      become: yes

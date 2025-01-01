@@ -12,6 +12,7 @@
         src: ../configs/caddy/Caddyfile.j2
         dest: "/root/caddy/Caddyfile"
         mode: "0700"
+      become: yes
 
     # when using this from a docker compose file make sure to add name
     # https://docs.docker.com/compose/networking/#use-a-pre-existing-network
@@ -19,6 +20,7 @@
       docker_network:
         name: "{{ network_name }}"
         internal: no
+      become: yes
 
     - name: Start Caddy container
       community.docker.docker_container:
@@ -37,3 +39,4 @@
           - "80:80"
           - "443:443"
         state: started
+      become: yes
