@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# First port to start gossa instances on
-PORT=8001
-
 # Create user data dirs
 # Create symlink to the vault
 # Start gossa for each user
@@ -11,8 +8,8 @@ mkdir -p data/{{ user.name }}
 if [ ! -L "/data/{{ user.name }}/vault" ]; then
     ln -s /vault /data/{{ user.name }}/vault
 fi
-/gossa -h gossa -p $PORT -ro={{ user.ro }} -prefix="/{{ user.name }}/" -symlinks=true data/{{ user.name }} &
-PORT=$((PORT+1))
+/gossa -h gossa -p {{ user.port }} -ro={{ user.ro }} -prefix="/{{ user.name }}/" -symlinks=true data/{{ user.name }} &
+
 {% endfor %}
 
 # Sleep forever

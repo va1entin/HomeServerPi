@@ -18,8 +18,9 @@ basic_auth {
   vars {http.auth.user.id} {{ user.name }}
 }
 handle @{{ user.name }}auth {
-  reverse_proxy gossa:800{{ loop.index }}
+  reverse_proxy gossa:{{ user.port }}
 }
+
 {% endfor %}
 
 log
