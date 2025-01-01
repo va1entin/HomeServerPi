@@ -2,69 +2,56 @@
 - name: HomeAssistant
   hosts: "pi4"
   vars:
-    host_config_dir: /etc/homeassistant
-    host_deconz_otau_dir: /etc/deconz/otau
-    host_deconz_dir: /opt/deconz
-  vars_files:
-    - secrets.yml
+    conbee_dev_host: "/dev/ttyACM0" # /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II
+    conbee_dev_container: "/dev/ttyACM0"
+  # vars_files:
+  #   - secrets.yml
   tasks:
-    - name: Ensure {{ host_deconz_dir }} dir exists
-      ansible.builtin.file:
-        path: "{{ host_deconz_dir }}"
-        state: directory
+    # - name: Download deCONZ container for firmware upgrades
+    #   containers.podman.podman_container:
+    #     name: deconz
+    #     image: docker.io/deconzcommunity/deconz:stable
+    #     detach: true
+    #     restart_policy: no
+    #     # pull: always
+    #     # group_add:
+    #       # - "keep-groups" # required for /dev/ttyACM0
+    #     annotation:
+    #       run.oci.keep_original_groups: "1" # replace with group_add right above for podman >3.2.0, see https://www.redhat.com/en/blog/files-devices-podman
+    #     ports:
+    #       - "8124:8124"
+    #       - "8125:8125"
+    #       - "8126:8126"
+    #     volumes:
+    #       - "/etc/localtime:/etc/localtime:ro"
+    #       - "opt-deconz:/opt/deCONZ"
+    #       - "deconz-otau:/root/otau"
+    #     env:
+    #       DECONZ_WS_PORT: "8124"
+    #       DECONZ_WEB_PORT: "8125"
+    #       DECONZ_VNC_MODE: "0"
+    #       DECONZ_VNC_PORT: "8126"
+    #       DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
+    #     device:
+    #       - "{{ conbee_dev_host }}:{{ conbee_dev_container }}"
+    #     state: stopped
 
-    - name: Ensure {{ host_deconz_otau_dir }} dir exists
-      ansible.builtin.file:
-        path: "{{ host_deconz_otau_dir }}"
-        state: directory
-
-    # ansible-galaxy collection install community.docker
-    - name: Download deCONZ container for firmware upgrades
-      community.docker.docker_container:
-        name: deconz
-        image: deconzcommunity/deconz:stable
-        detach: true
-        network_mode: host
-        restart: true
-        restart_policy: always
-        pull: true
-        volumes:
-          - "/etc/localtime:/etc/localtime:ro"
-          - "{{ host_deconz_dir }}:/opt/deCONZ"
-          - "{{ host_deconz_otau_dir }}:/root/otau"
-        env:
-          DECONZ_WS_PORT: "8124"
-          DECONZ_WEB_PORT: "8125"
-          DECONZ_VNC_MODE: "0"
-          DECONZ_VNC_PORT: "8126"
-          DECONZ_VNC_PASSWORD: "{{ vault_deconz_vnc_password }}"
-        devices:
-          - "/dev/ttyACM0:/dev/ttyACM0"
-          #- "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
-        # state: started
-        state: stopped
-
-    - name: Ensure {{ host_config_dir }} dir exists
-      ansible.builtin.file:
-        path: "{{ host_config_dir }}"
-        state: directory
-
-    # ansible-galaxy collection install community.docker
     - name: Run HomeAssistant container
-      community.docker.docker_container:
+      containers.podman.podman_container:
         name: homeassistant
         image: ghcr.io/home-assistant/home-assistant:stable
-        privileged: true
         detach: true
-        network_mode: host
-        restart: true
-        restart_policy: unless-stopped
-        pull: true
+        restart_policy: always
+        # pull: always # newer
+        # group_add:
+          # - "keep-groups" # required for /dev/ttyACM0
+        annotation:
+          run.oci.keep_original_groups: "1" # replace with group_add right above for podman >3.2.0, see https://www.redhat.com/en/blog/files-devices-podman
+        ports:
+          - "8123:8123"
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
-          - "{{ host_config_dir }}:/config"
-        devices:
-          - "/dev/ttyACM0:/dev/ttyACM0"
-          #- "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2268641-if00:/dev/ttyACM0"
+          - "homeassistant-config:/config"
+        device:
+          - "{{ conbee_dev_host }}:{{ conbee_dev_container }}"
         state: started
-        # state: stopped
