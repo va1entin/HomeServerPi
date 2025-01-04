@@ -1,0 +1,1 @@
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1cf1", ATTRS{idProduct}=="0030", ATTRS{product}=="ConBee II", GROUP="val", OWNER="val"

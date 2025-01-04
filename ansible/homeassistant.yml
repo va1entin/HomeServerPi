@@ -36,13 +36,20 @@
     #       - "{{ conbee_dev_host }}:{{ conbee_dev_container }}"
     #     state: stopped
 
+    - name: "Add udev rules to ensure proper ownership for ConBee 2"
+      ansible.builtin.copy:
+        src: "../configs/udev/99-conbee-2.rules"
+        dest: "/etc/udev/rules.d/99-conbee-2.rules"
+        mode: "0644"
+      become: yes
+
     - name: Run HomeAssistant container
       containers.podman.podman_container:
         name: homeassistant
         image: ghcr.io/home-assistant/home-assistant:stable
         detach: true
         restart_policy: always
-        # pull: always # newer
+        pull: always # newer
         # group_add:
           # - "keep-groups" # required for /dev/ttyACM0
         annotation:
