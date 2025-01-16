@@ -1,0 +1,6 @@
+[Unit]
+Description=Update DynDns at cloudflare
+
+[Service]
+Type=oneshot
+ExecStart=/home/{{ ansible_user_id }}/tools/cloudflare_update_record/cloudflare_update_record.py -4 -c /home/{{ ansible_user_id }}/tools/cloudflare_update_record/cloudflare_update_record_config.yaml

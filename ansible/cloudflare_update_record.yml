@@ -1,0 +1,43 @@
+---
+- name: Add cloudflare_update_record tool, systemd service and timer
+  hosts: "pi4"
+  tasks:
+    - name: Get tools from GitHub
+      ansible.builtin.git:
+        repo: "https://github.com/va1entin/tools"
+        dest: "/home/{{ ansible_user_id }}/tools"
+
+    - name: Make sure python yaml is installed
+      ansible.builtin.apt:
+        name: "python3-yaml"
+        force_apt_get: true
+        state: latest
+      become: yes
+
+    - name: Add config for DynDns renewal script
+      copy:
+        src: ../configs/cloudflare/cloudflare_config_{{ inventory_hostname }}.yaml
+        dest: "/home/{{ ansible_user_id }}/tools/cloudflare_update_record/cloudflare_update_record_config.yaml"
+        mode: '0600'
+
+    - name: Create systemd service unit file
+      ansible.builtin.template:
+        src: ../configs/systemd/services/cloudflare_update_record.service.j2
+        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/cloudflare_update_record.service"
+
+    - name: Create systemd timer unit file
+      ansible.builtin.template:
+        src: ../configs/systemd/timers/cloudflare_update_record.timer.j2
+        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/cloudflare_update_record.timer"
+
+    - name: Reload systemd daemon for user
+      ansible.builtin.systemd:
+        daemon_reload: true
+        scope: user
+
+    - name: Enable and start systemd timer for user
+      ansible.builtin.systemd:
+        name: cloudflare_update_record.timer
+        enabled: true
+        scope: user
+        state: started

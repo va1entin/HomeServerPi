@@ -1,0 +1,9 @@
+[Unit]
+Description=Run cloudflare_update_record.service every 10 minutes
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+
+[Install]
+WantedBy=timers.target
