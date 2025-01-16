@@ -3,7 +3,7 @@
 ROOT_FOLDER="/mnt/media/vault"
 
 function az () {
-    docker run --rm -v azcli:/root/.azure mcr.microsoft.com/azure-cli az "$@";
+    podman run --rm -v azcli:/root/.azure mcr.microsoft.com/azure-cli az "$@";
 }
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') Starting rclone sync to Azure Blob Storage..."
@@ -11,7 +11,7 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') Starting rclone sync to Azure Blob Storage...
 echo "Checking Azure access..."
 if ! az account list | jq -e '.[] | select(.id == "{{ vault_az_subscription_id }}")' > /dev/null; then
     echo "Subscription {{ vault_az_subscription_id }} not found"
-    echo "No Azure login! Please run 'docker run --rm -v azcli:/root/.azure mcr.microsoft.com/azure-cli az login' and try again."
+    echo "No Azure login! Please run 'podman run --rm -v azcli:/root/.azure mcr.microsoft.com/azure-cli az login' and try again."
     exit 1
 fi
 

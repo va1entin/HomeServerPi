@@ -1,0 +1,33 @@
+---
+- name: Add backup tools and configs
+  hosts: "pi4"
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Add az_backup.sh
+      ansible.builtin.template:
+        src: ../scripts/azure/az_backup.sh.j2
+        dest: "/home/{{ ansible_user_id }}/az_backup.sh"
+        mode: "0700"
+
+    - name: Create systemd service unit file
+      ansible.builtin.template:
+        src: ../configs/systemd/services/az_backup.service.j2
+        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/az_backup.service"
+
+    - name: Create systemd timer unit file
+      ansible.builtin.template:
+        src: ../configs/systemd/timers/az_backup.timer.j2
+        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/az_backup.timer"
+
+    - name: Reload systemd daemon for user
+      ansible.builtin.systemd:
+        daemon_reload: true
+        scope: user
+
+    - name: Enable and start systemd timer for user
+      ansible.builtin.systemd:
+        name: az_backup.timer
+        enabled: true
+        scope: user
+        state: started

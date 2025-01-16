@@ -1,0 +1,6 @@
+[Unit]
+Description=AZ Vault Backup
+
+[Service]
+Type=oneshot
+ExecStart=/home/{{ ansible_user_id }}/az_backup.sh
