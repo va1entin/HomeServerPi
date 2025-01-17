@@ -1,0 +1,6 @@
+[Unit]
+Description=Remount media drive
+
+[Service]
+Type=oneshot
+ExecStart=sh -c 'mountpoint -q /mnt/media || mount /mnt/media'
