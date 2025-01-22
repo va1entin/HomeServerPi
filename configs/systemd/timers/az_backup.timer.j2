@@ -1,8 +1,8 @@
 [Unit]
-Description=Run az_backup.service on Saturdays at 3:00 AM
+Description=Run az_backup.service daily at 3:00 AM
 
 [Timer]
-OnCalendar=Sat *-*-* 03:00:00
+OnCalendar=*-*-* 03:00:00
 Persistent=true
 
 [Install]
