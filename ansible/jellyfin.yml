@@ -3,7 +3,7 @@
   hosts: "pi4"
   vars:
     media_dir: "/mnt/media/vault"
-    jellyfin_version: 10.10.4
+    jellyfin_version: 10.10.5
   tasks:
     - name: Start Jellyfin container
       containers.podman.podman_container:
