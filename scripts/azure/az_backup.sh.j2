@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# To verify Content-MD5 attributes from Azure: md5sum --binary $filename | awk '{print $1}' | xxd -p -r | base64
+
 ROOT_FOLDER="/mnt/media/vault"
 
 function az () {
@@ -27,6 +29,6 @@ sas_url=$(echo "https://{{ vault_storage_account_name }}.blob.core.windows.net/{
 echo "Processing folders..."
 for folder in $(ls $ROOT_FOLDER); do
     echo "Processing $ROOT_FOLDER/$folder"
-    rclone --azureblob-sas-url "$sas_url" --azureblob-archive-tier-delete -P sync "$ROOT_FOLDER/$folder" "azure:{{ vault_storage_container_name }}/$folder"
+    rclone --azureblob-sas-url "$sas_url" --azureblob-archive-tier-delete -P copy "$ROOT_FOLDER/$folder" "azure:{{ vault_storage_container_name }}/$folder"
     echo ""
 done
