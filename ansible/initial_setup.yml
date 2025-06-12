@@ -2,8 +2,8 @@
 - name: Initial setup of raspberry pi
   hosts: "pis"
   vars:
-    user_name: val
-    #new_user_groups: [sudo, adm]
+    # user_name: val
+    # new_user_groups: [sudo, adm]
     initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, python3-pip, yamllint, file, rclone, jq, curl, podman]
   vars_files:
     - secrets.yml
@@ -26,22 +26,26 @@
         update_cache: true
         force_apt_get: true
         state: latest
+      become: yes
 
     - name: Install initial packages
       ansible.builtin.apt:
         name: "{{ initial_packages }}"
         force_apt_get: true
         state: latest
+      become: yes
 
     - name: Add unattended-upgrades config
       ansible.builtin.copy:
         src: ../configs/unattended-upgrades/50unattended-upgrades
         dest: /etc/apt/apt.conf.d/50unattended-upgrades
+      become: yes
 
     - name: Add vimrc
       ansible.builtin.copy:
         src: ../configs/vim/vimrc
         dest: /etc/vim/vimrc
+      become: yes
 
     # ansible-galaxy collection install community.general
     # not required anymore with rpi imager setup
@@ -53,10 +57,27 @@
       ansible.builtin.shell:
         cmd: "loginctl enable-linger {{ user_name }}"
 
-    - name: Perform systemd daemon-reload
+    - name: Create systemd service unit file for container system prune
+      ansible.builtin.template:
+        src: ../configs/systemd/services/podman_system_prune.service.j2
+        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/podman_system_prune.service"
+
+    - name: Create systemd timer unit file for container system prune
+      ansible.builtin.template:
+        src: ../configs/systemd/timers/podman_system_prune.timer.j2
+        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/podman_system_prune.timer"
+
+    - name: Perform systemd daemon-reload in user scope
       ansible.builtin.systemd_service:
         daemon_reload: true
-      become: yes
+        scope: user
+
+    - name: Enable and start systemd service for container system prune
+      ansible.builtin.systemd:
+        name: podman_system_prune.service
+        enabled: true
+        scope: user
+        state: started
 
     - name: Enable podman-restart systemd service
       ansible.builtin.systemd_service:
@@ -64,15 +85,6 @@
         enabled: true
         scope: user
         state: started
-
-    - name: Add cron job - container system prune
-      ansible.builtin.cron:
-        name: "Container system prune"
-        cron_file: "container_system_prune"
-        user: "{{ user_name }}"
-        minute: "0"
-        hour: "4"
-        job: 'podman system prune -a -f --volumes'
 
     - name: Add cron job - reboot on lost internet connection
       cron:

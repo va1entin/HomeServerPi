@@ -1,0 +1,6 @@
+[Unit]
+Description=Podman system prune
+
+[Service]
+Type=oneshot
+ExecStart=sh -c 'podman system prune -a -f --volumes'
