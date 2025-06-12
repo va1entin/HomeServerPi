@@ -2,9 +2,9 @@
 - name: Initial setup of raspberry pi
   hosts: "pis"
   vars:
-    #user_name: val
+    user_name: val
     #new_user_groups: [sudo, adm]
-    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, docker-compose, python3-docker, python3-pip, yamllint, file, rclone, jq, curl]
+    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, python3-pip, yamllint, file, rclone, jq, curl, podman]
   vars_files:
     - secrets.yml
   tasks:
@@ -49,14 +49,30 @@
     #   community.general.timezone:
     #     name: Europe/Berlin
 
-    - name: Add cron job - docker prune
-      cron:
-        name: "Docker prune"
-        cron_file: "docker_prune"
-        user: "root"
+    - name: Enable systemd linger via loginctl
+      ansible.builtin.shell:
+        cmd: "loginctl enable-linger {{ user_name }}"
+
+    - name: Perform systemd daemon-reload
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+      become: yes
+
+    - name: Enable podman-restart systemd service
+      ansible.builtin.systemd_service:
+        name: podman-restart
+        enabled: true
+        scope: user
+        state: started
+
+    - name: Add cron job - container system prune
+      ansible.builtin.cron:
+        name: "Container system prune"
+        cron_file: "container_system_prune"
+        user: "{{ user_name }}"
         minute: "0"
         hour: "4"
-        job: 'docker system prune -f'
+        job: 'podman system prune -a -f --volumes'
 
     - name: Add cron job - reboot on lost internet connection
       cron:
