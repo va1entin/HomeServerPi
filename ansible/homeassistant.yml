@@ -46,7 +46,7 @@
     - name: Run HomeAssistant container
       containers.podman.podman_container:
         name: homeassistant
-        image: ghcr.io/home-assistant/home-assistant:2025.6.0
+        image: ghcr.io/home-assistant/home-assistant:2025.7.2
         detach: true
         restart_policy: always
         pull: always # newer
