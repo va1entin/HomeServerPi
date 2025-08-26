@@ -2,7 +2,7 @@
 - name: Caddy
   hosts: "pi4"
   vars:
-    caddy_version: "2.10.0-alpine"
+    caddy_version: "2.10.2-alpine"
     network_name: "caddy"
   vars_files:
     - secrets.yml
