@@ -2,7 +2,7 @@
 - name: Syncthing
   hosts: "pi4"
   vars:
-    syncthing_version: "2.0.7"
+    syncthing_version: "2.0.8"
     host_sync_dir: "/var/syncthing"
     vault_dir: "/mnt/media/vault"
     container_sync_dir: "/var/syncthing"
