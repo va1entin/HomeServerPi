@@ -2,10 +2,10 @@
 - name: Gossa
   hosts: "pi4"
   vars:
-    gossa_dir: "/root/gossa"
-    data_dir: "/mnt/media/gossa"
-    vault_dir: "/mnt/media/vault"
-    network_name: "caddy"
+    gossa_dir: "/home/{{ ansible_user_id }}/gossa"
+    data_dir: "/mnt/data/gossa"
+    vault_dir: "/mnt/data/vault"
+    network_name: "caddy-internal"
   vars_files:
     - secrets.yml
   tasks:
@@ -13,64 +13,55 @@
       ansible.builtin.file:
         path: "{{ data_dir }}"
         state: directory
-      become: yes
+
+    - name: "Ensure {{ gossa_dir }} dir exists"
+      ansible.builtin.file:
+        path: "{{ gossa_dir }}"
+        state: directory
 
     - name: "Render and copy Gossa entrypoint script"
       ansible.builtin.template:
         src: ../configs/gossa/start-gossa.sh.j2
-        dest: "/root/gossa/start-gossa.sh"
+        dest: "{{ gossa_dir }}/start-gossa.sh"
         mode: "0700"
-      become: yes
 
     - name: "Copy Gossa executable"
       ansible.builtin.copy:
         src: "../configs/gossa/gossa-linux-arm64"
-        dest: "/root/gossa/gossa-linux-arm64"
+        dest: "{{ gossa_dir }}/gossa-linux-arm64"
         mode: "0755"
-      become: yes
 
     - name: "Copy Gossa Dockerfile"
       ansible.builtin.copy:
         src: "../configs/gossa/Dockerfile"
-        dest: "/root/gossa/Dockerfile"
-      become: yes
+        dest: "{{ gossa_dir }}/Dockerfile"
 
     - name: "Build Gossa container image"
-      community.docker.docker_image:
+      containers.podman.podman_image:
         name: "gossa"
-        source: build
-        build:
-          path: "{{ gossa_dir }}"
-          pull: true
-        force_source: true
-        force_tag: true
+        # source: build
+        path: "{{ gossa_dir }}"
+        # pull: true
+        force: true
         tag: "latest"
         state: present
-      become: yes
 
-    - name: Add proxy docker network
-      docker_network:
+    - name: Add proxy container network
+      containers.podman.podman_network:
         name: "{{ network_name }}"
-        internal: no
-      become: yes
+        internal: true
 
     - name: "Start Gossa container"
-      community.docker.docker_container:
+      containers.podman.podman_container:
         name: gossa
-        image: "gossa:latest"
+        image: "localhost/gossa:latest"
         detach: true
-        restart: true
-        restart_policy: unless-stopped
-        pull: false
+        restart_policy: always
+        pull: never
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
           - "{{ data_dir }}:/data"
           - "{{ vault_dir }}:/vault"
-        #network_mode: "host"
-        networks:
-          - name: "{{ network_name }}"
-        ports:
-          - "8001:8001"
-          - "8002:8002"
+        network:
+          - "{{ network_name }}"
         state: started
-      become: yes
