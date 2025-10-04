@@ -49,11 +49,6 @@
         image: ghcr.io/home-assistant/home-assistant:2025.10.1
         detach: true
         restart_policy: always
-        pull: always # newer
-        # group_add:
-          # - "keep-groups" # required for /dev/ttyACM0
-        annotation:
-          run.oci.keep_original_groups: "1" # replace with group_add right above for podman >3.2.0, see https://www.redhat.com/en/blog/files-devices-podman
         ports:
           - "8123:8123"
         volumes:
