@@ -2,33 +2,28 @@
 - name: Syncthing
   hosts: "pi4"
   vars:
-    syncthing_version: "2.0.10"
-    host_sync_dir: "/var/syncthing"
-    vault_dir: "/mnt/media/vault"
-    container_sync_dir: "/var/syncthing"
+    host_syncthing_dir: "/home/{{ ansible_user_id }}/syncthing"
+    vault_dir: "/mnt/data/vault"
+    container_syncthing_dir: "/var/syncthing"
   tasks:
-    - name: "Ensure {{ host_sync_dir }} dir exists"
+    - name: "Ensure {{ host_syncthing_dir }} dir exists"
       ansible.builtin.file:
-        path: "{{ host_sync_dir }}"
+        path: "{{ host_syncthing_dir }}"
         state: directory
 
-    # ansible-galaxy collection install community.docker
     - name: Start Syncthing container
-      community.docker.docker_container:
+      containers.podman.podman_container:
         name: syncthing
-        image: "syncthing/syncthing:{{ syncthing_version }}"
+        image: "docker.io/syncthing/syncthing:2.0.10"
         detach: true
         network_mode: host
-        restart: true
         restart_policy: unless-stopped
-        pull: true
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
-          - "{{ host_sync_dir }}:{{ container_sync_dir }}"
-          - "{{ vault_dir }}:{{ container_sync_dir }}/vault"
+          - "{{ host_syncthing_dir }}:{{ container_syncthing_dir }}"
+          - "{{ vault_dir }}:{{ container_syncthing_dir }}/vault"
         env:
           STGUIADDRESS: "" # fall back to 127.0.0.1, see https://github.com/syncthing/syncthing/blob/main/README-Docker.md#gui-security
-          PUID: "33"
-          PGID: "1001"
+          PUID: "0"
+          PGID: "0"
         state: started
-      become: true
