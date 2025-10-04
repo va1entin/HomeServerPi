@@ -2,16 +2,12 @@
 - name: Initial setup of raspberry pi
   hosts: "pis"
   vars:
-    # user_name: val
     # new_user_groups: [sudo, adm]
-    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, ntp, ntpdate, python3-pip, yamllint, file, rclone, jq, curl, podman]
-  vars_files:
-    - secrets.yml
+    data_mount_point: "/mnt/data"
+    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, python3-pip, file, rclone, jq, curl, podman] #ntp, yamllint
   tasks:
-# Write image to SD using rpi-imager from bookworm onwards because wpa_supplicant is not working anymore
-## Write image to SD card (buster and older)
-## sudo dd bs=4M if=2020-08-20-raspios-buster-armhf.img of=/dev/sdX conv=fsync
-# Add ssh key to user created with userconf file during initial boot
+# Write image to SD using rpi-imager and specify user
+# Add ssh key to user
 # ssh-copy-id -i ~/.ssh/id_rsa.pub user@host
     # not required anymore with bullseye+ and rpi imager setup
     # - name: Add user to groups
@@ -47,15 +43,14 @@
         dest: /etc/vim/vimrc
       become: yes
 
-    # ansible-galaxy collection install community.general
-    # not required anymore with rpi imager setup
-    # - name: Set timezone to Europe/Berlin
-    #   community.general.timezone:
-    #     name: Europe/Berlin
-
     - name: Enable systemd linger via loginctl
       ansible.builtin.shell:
-        cmd: "loginctl enable-linger {{ user_name }}"
+        cmd: "loginctl enable-linger {{ ansible_user_id }}"
+
+    - name: Ensure systemd user dir exists
+      ansible.builtin.file:
+        path: "/home/{{ ansible_user_id }}/.config/systemd/user/"
+        state: directory
 
     - name: Create systemd service unit file for container system prune
       ansible.builtin.template:
@@ -72,9 +67,9 @@
         daemon_reload: true
         scope: user
 
-    - name: Enable and start systemd service for container system prune
+    - name: Enable and start systemd timer for container system prune
       ansible.builtin.systemd:
-        name: podman_system_prune.service
+        name: podman_system_prune.timer
         enabled: true
         scope: user
         state: started
@@ -86,6 +81,21 @@
         scope: user
         state: started
 
+    - name: Ensure data disk mount point exists
+      ansible.builtin.file:
+        path: "{{ data_mount_point }}"
+        state: directory
+
+    - name: Mount data disk and add to fstab
+      ansible.posix.mount:
+        path: "{{ data_mount_point }}"
+        src: UUID=9d4ed036-0789-40e2-9c27-b1acb503f38d
+        fstype: ext4
+        opts: defaults,nofail
+        passno: 2
+        state: mounted
+      become: yes
+
     # - name: Add cron job - reboot on lost internet connection
     #   cron:
     #     name: "Reboot on lost internet connection"
@@ -93,6 +103,3 @@
     #     user: "root"
     #     minute: "*/30"
     #     job: 'ping -c4 google.com || shutdown -r now'
-
-    # - name: Reboot
-    #  ansible.builtin.reboot:
