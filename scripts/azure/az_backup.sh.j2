@@ -2,7 +2,7 @@
 
 # To verify Content-MD5 attributes from Azure: md5sum --binary $filename | awk '{print $1}' | xxd -p -r | base64
 
-ROOT_FOLDER="/mnt/media/vault"
+ROOT_FOLDER="/mnt/data/vault"
 
 function az () {
     podman run --rm -v azcli:/root/.azure mcr.microsoft.com/azure-cli az "$@";
