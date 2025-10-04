@@ -2,13 +2,12 @@
 - name: Jellyfin
   hosts: "pi4"
   vars:
-    media_dir: "/mnt/media/vault"
-    jellyfin_version: 10.10.7
+    media_dir: "/mnt/data/vault"
   tasks:
     - name: Start Jellyfin container
       containers.podman.podman_container:
         name: jellyfin
-        image: "docker.io/jellyfin/jellyfin:{{ jellyfin_version }}"
+        image: "docker.io/jellyfin/jellyfin:10.10.7"
         detach: true
         restart_policy: always
         ports:
