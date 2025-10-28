@@ -17,7 +17,7 @@
         image: "docker.io/syncthing/syncthing:2.0.10"
         detach: true
         network_mode: host
-        restart_policy: unless-stopped
+        restart_policy: always
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
           - "{{ host_syncthing_dir }}:{{ container_syncthing_dir }}"
