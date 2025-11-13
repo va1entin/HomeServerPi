@@ -2,41 +2,41 @@
 - name: Gossa
   hosts: "pi4"
   vars:
-    gossa_dir: "/home/{{ ansible_user_id }}/gossa"
+    gossa_dir: "/home/{{ ansible_facts['user_id'] }}/gossa"
     data_dir: "/mnt/data/gossa"
     vault_dir: "/mnt/data/vault"
     network_name: "caddy-internal"
   vars_files:
     - secrets.yml
   tasks:
-    - name: "Ensure {{ data_dir }} dir exists"
+    - name: Ensure {{ data_dir }} dir exists
       ansible.builtin.file:
         path: "{{ data_dir }}"
         state: directory
 
-    - name: "Ensure {{ gossa_dir }} dir exists"
+    - name: Ensure {{ gossa_dir }} dir exists
       ansible.builtin.file:
         path: "{{ gossa_dir }}"
         state: directory
 
-    - name: "Render and copy Gossa entrypoint script"
+    - name: Render and copy Gossa entrypoint script
       ansible.builtin.template:
         src: ../configs/gossa/start-gossa.sh.j2
         dest: "{{ gossa_dir }}/start-gossa.sh"
         mode: "0700"
 
-    - name: "Copy Gossa executable"
+    - name: Copy Gossa executable
       ansible.builtin.copy:
         src: "../configs/gossa/gossa-linux-arm64"
         dest: "{{ gossa_dir }}/gossa-linux-arm64"
         mode: "0755"
 
-    - name: "Copy Gossa Dockerfile"
+    - name: Copy Gossa Dockerfile
       ansible.builtin.copy:
         src: "../configs/gossa/Dockerfile"
         dest: "{{ gossa_dir }}/Dockerfile"
 
-    - name: "Build Gossa container image"
+    - name: Build Gossa container image
       containers.podman.podman_image:
         name: "gossa"
         # source: build
@@ -51,7 +51,7 @@
         name: "{{ network_name }}"
         internal: true
 
-    - name: "Start Gossa container"
+    - name: Start Gossa container
       containers.podman.podman_container:
         name: gossa
         image: "localhost/gossa:latest"

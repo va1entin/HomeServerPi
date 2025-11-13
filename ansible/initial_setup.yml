@@ -4,7 +4,7 @@
   vars:
     # new_user_groups: [sudo, adm]
     data_mount_point: "/mnt/data"
-    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, python3-pip, file, rclone, jq, curl, podman] #ntp, yamllint
+    initial_packages: [ssl-cert, screen, python3, vim, git, unattended-upgrades, locate, python3-pip, file, rclone, jq, curl, podman] # ntp, yamllint
   tasks:
 # Write image to SD using rpi-imager and specify user
 # Add ssh key to user
@@ -22,45 +22,45 @@
         update_cache: true
         force_apt_get: true
         state: latest
-      become: yes
+      become: true
 
     - name: Install initial packages
       ansible.builtin.apt:
         name: "{{ initial_packages }}"
         force_apt_get: true
         state: latest
-      become: yes
+      become: true
 
     - name: Add unattended-upgrades config
       ansible.builtin.copy:
         src: ../configs/unattended-upgrades/50unattended-upgrades
         dest: /etc/apt/apt.conf.d/50unattended-upgrades
-      become: yes
+      become: true
 
     - name: Add vimrc
       ansible.builtin.copy:
         src: ../configs/vim/vimrc
         dest: /etc/vim/vimrc
-      become: yes
+      become: true
 
     - name: Enable systemd linger via loginctl
       ansible.builtin.shell:
-        cmd: "loginctl enable-linger {{ ansible_user_id }}"
+        cmd: "loginctl enable-linger {{ ansible_facts['user_id'] }}"
 
     - name: Ensure systemd user dir exists
       ansible.builtin.file:
-        path: "/home/{{ ansible_user_id }}/.config/systemd/user/"
+        path: "/home/{{ ansible_facts['user_id'] }}/.config/systemd/user/"
         state: directory
 
     - name: Create systemd service unit file for container system prune
       ansible.builtin.template:
         src: ../configs/systemd/services/podman_system_prune.service.j2
-        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/podman_system_prune.service"
+        dest: "/home/{{ ansible_facts['user_id'] }}/.config/systemd/user/podman_system_prune.service"
 
     - name: Create systemd timer unit file for container system prune
       ansible.builtin.template:
         src: ../configs/systemd/timers/podman_system_prune.timer.j2
-        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/podman_system_prune.timer"
+        dest: "/home/{{ ansible_facts['user_id'] }}/.config/systemd/user/podman_system_prune.timer"
 
     - name: Perform systemd daemon-reload in user scope
       ansible.builtin.systemd_service:
@@ -94,7 +94,7 @@
         opts: defaults,nofail
         passno: 2
         state: mounted
-      become: yes
+      become: true
 
     # - name: Add cron job - reboot on lost internet connection
     #   cron:

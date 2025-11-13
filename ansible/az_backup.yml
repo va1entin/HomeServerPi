@@ -7,18 +7,18 @@
     - name: Add az_backup.sh
       ansible.builtin.template:
         src: ../scripts/azure/az_backup.sh.j2
-        dest: "/home/{{ ansible_user_id }}/az_backup.sh"
+        dest: "/home/{{ ansible_facts['user_id'] }}/az_backup.sh"
         mode: "0700"
 
     - name: Create systemd service unit file
       ansible.builtin.template:
         src: ../configs/systemd/services/az_backup.service.j2
-        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/az_backup.service"
+        dest: "/home/{{ ansible_facts['user_id'] }}/.config/systemd/user/az_backup.service"
 
     - name: Create systemd timer unit file
       ansible.builtin.template:
         src: ../configs/systemd/timers/az_backup.timer.j2
-        dest: "/home/{{ ansible_user_id }}/.config/systemd/user/az_backup.timer"
+        dest: "/home/{{ ansible_facts['user_id'] }}/.config/systemd/user/az_backup.timer"
 
     - name: Reload systemd daemon for user
       ansible.builtin.systemd:

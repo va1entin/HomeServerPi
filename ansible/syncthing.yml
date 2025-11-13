@@ -2,11 +2,11 @@
 - name: Syncthing
   hosts: "pi4"
   vars:
-    host_syncthing_dir: "/home/{{ ansible_user_id }}/syncthing"
+    host_syncthing_dir: "/home/{{ ansible_facts['user_id'] }}/syncthing"
     vault_dir: "/mnt/data/vault"
     container_syncthing_dir: "/var/syncthing"
   tasks:
-    - name: "Ensure {{ host_syncthing_dir }} dir exists"
+    - name: Ensure {{ host_syncthing_dir }} dir exists
       ansible.builtin.file:
         path: "{{ host_syncthing_dir }}"
         state: directory
