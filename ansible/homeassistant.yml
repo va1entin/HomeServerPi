@@ -4,8 +4,6 @@
   vars:
     conbee_dev_host: "/dev/ttyACM0" # /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II
     conbee_dev_container: "/dev/ttyACM0"
-  # vars_files:
-  #   - secrets.yml
   tasks:
     # - name: Download deCONZ container for firmware upgrades
     #   containers.podman.podman_container:
@@ -36,17 +34,21 @@
     #       - "{{ conbee_dev_host }}:{{ conbee_dev_container }}"
     #     state: stopped
 
-    - name: "Add udev rules to ensure proper ownership for ConBee 2"
+    - name: Add udev rules to ensure proper ownership for ConBee 2
       ansible.builtin.copy:
         src: "../configs/udev/99-conbee-2.rules"
         dest: "/etc/udev/rules.d/99-conbee-2.rules"
         mode: "0644"
-      become: yes
+      become: true
+
+    - name: Apply udev rules
+      ansible.builtin.command: udevadm control --reload && udevadm trigger && udevadm settle
+      become: true
 
     - name: Run HomeAssistant container
       containers.podman.podman_container:
         name: homeassistant
-        image: ghcr.io/home-assistant/home-assistant:2025.10.1
+        image: ghcr.io/home-assistant/home-assistant:2025.11.2
         detach: true
         restart_policy: always
         ports:
@@ -56,4 +58,24 @@
           - "homeassistant-config:/config"
         device:
           - "{{ conbee_dev_host }}:{{ conbee_dev_container }}"
+        state: started
+
+    # Do a little restart dance to make sure ConBee is properly assigned in container and ZHA is working
+    # Very ugly workaround for a weird (presumed) race condition where the container starts with /dev/ttyACM0 owned
+    # by root and then switches to nobody at the end of hass startup; there are some udev events visible in udevadm monitor
+    # For some reason this doesn't happen when stopping and starting the container manually after the first run
+    # Direct restart also doesn't work because of a weird port conflict, feels like podman isn't stopping the container fully before starting it again
+    # Tried a few things but only viable alternative seems to be running rootful for now
+    - name: Wait for HomeAssistant to start
+      ansible.builtin.pause:
+        minutes: 1
+
+    - name: Stop HomeAssistant container
+      containers.podman.podman_container:
+        name: homeassistant
+        state: stopped
+
+    - name: Start HomeAssistant container
+      containers.podman.podman_container:
+        name: homeassistant
         state: started
