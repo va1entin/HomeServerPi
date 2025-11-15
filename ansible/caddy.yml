@@ -2,41 +2,48 @@
 - name: Caddy
   hosts: "pi4"
   vars:
-    caddy_version: "2.10.2-alpine"
     network_name: "caddy"
+    caddy_dir: "/home/{{ ansible_facts['user_id'] }}/caddy"
   vars_files:
     - secrets.yml
   tasks:
-    - name: "Render and copy Caddyfile"
+    - name: "Ensure {{ caddy_dir }} dir exists"
+      ansible.builtin.file:
+        path: "{{ caddy_dir }}"
+        state: directory
+
+    - name: Render and copy Caddyfile
       ansible.builtin.template:
         src: ../configs/caddy/Caddyfile.j2
-        dest: "/root/caddy/Caddyfile"
+        dest: "{{ caddy_dir }}/Caddyfile"
         mode: "0700"
-      become: yes
 
-    # when using this from a docker compose file make sure to add name
-    # https://docs.docker.com/compose/networking/#use-a-pre-existing-network
-    - name: Add proxy docker network
-      docker_network:
+    - name: Add proxy container network
+      containers.podman.podman_network:
         name: "{{ network_name }}"
-        internal: no
-      become: yes
+        internal: false
+
+    - name: Set unprivileged port start from 1024 to 80
+      ansible.posix.sysctl:
+        sysctl_file: /etc/sysctl.d/98-rpi.conf
+        name: net.ipv4.ip_unprivileged_port_start
+        value: '80'
+        state: present
+      become: true
 
     - name: Start Caddy container
-      community.docker.docker_container:
+      containers.podman.podman_container:
         name: caddy
-        image: "caddy:{{ caddy_version }}"
+        image: docker.io/caddy:2.10.2-alpine
         detach: true
-        restart: true
-        restart_policy: unless-stopped
-        pull: true
+        restart_policy: always
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
-          - "/root/caddy/Caddyfile:/etc/caddy/Caddyfile:ro"
-        networks:
-          - name: "{{ network_name }}"
+          - "{{ caddy_dir }}/Caddyfile:/etc/caddy/Caddyfile:ro"
+        network:
+          - "{{ network_name }}"
+          - "{{ network_name }}-internal"
         ports:
           - "80:80"
           - "443:443"
         state: started
-      become: yes
