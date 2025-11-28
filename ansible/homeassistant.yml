@@ -2,6 +2,7 @@
 - name: HomeAssistant
   hosts: "pi4"
   vars:
+    homeassistant_version: "2025.11.3"
     conbee_dev_host: "/dev/ttyACM0" # /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II
     conbee_dev_container: "/dev/ttyACM0"
   tasks:
@@ -41,14 +42,25 @@
         mode: "0644"
       become: true
 
-    - name: Apply udev rules
-      ansible.builtin.command: udevadm control --reload && udevadm trigger && udevadm settle
+    - name: Apply udev rules - reload udev
+      ansible.builtin.command:
+        cmd: udevadm control --reload
+      become: true
+
+    - name: Apply udev rules - trigger udev
+      ansible.builtin.command:
+        cmd: udevadm trigger
+      become: true
+
+    - name: Apply udev rules - wait for udev settle
+      ansible.builtin.command:
+        cmd: udevadm settle
       become: true
 
     - name: Run HomeAssistant container
       containers.podman.podman_container:
         name: homeassistant
-        image: ghcr.io/home-assistant/home-assistant:2025.11.2
+        image: "ghcr.io/home-assistant/home-assistant:{{ homeassistant_version }}"
         detach: true
         restart_policy: always
         ports:
