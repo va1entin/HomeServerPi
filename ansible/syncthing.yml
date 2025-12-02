@@ -14,7 +14,7 @@
     - name: Start Syncthing container
       containers.podman.podman_container:
         name: syncthing
-        image: "docker.io/syncthing/syncthing:2.0.11"
+        image: "docker.io/syncthing/syncthing:2.0.12"
         detach: true
         network_mode: host
         restart_policy: always
