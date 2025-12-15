@@ -7,7 +7,7 @@
     - name: Start Jellyfin container
       containers.podman.podman_container:
         name: jellyfin
-        image: "docker.io/jellyfin/jellyfin:10.11.4"
+        image: "docker.io/jellyfin/jellyfin:10.11.5"
         detach: true
         restart_policy: always
         ports:
