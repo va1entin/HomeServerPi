@@ -34,7 +34,7 @@
     - name: Start Caddy container
       containers.podman.podman_container:
         name: caddy
-        image: docker.io/caddy:2.11.1-alpine
+        image: docker.io/caddy:2.11.2-alpine
         detach: true
         restart_policy: always
         volumes:
