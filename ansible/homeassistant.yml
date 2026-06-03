@@ -57,6 +57,15 @@
         cmd: udevadm settle
       become: true
 
+    - name: Add cron job to restart HomeAssistant container after reboots to work around ConBee/ZHA issues
+      cron:
+        name: "Restart HomeAssistant after reboot"
+        cron_file: "podman_restart_homeassistant_after_reboot"
+        user: "val"
+        special_time: "reboot"
+        job: '/bin/sh -c "sleep 90; podman stop -t 60 homeassistant; sleep 10; podman start homeassistant"'
+      become: true
+
     - name: Run HomeAssistant container
       containers.podman.podman_container:
         name: homeassistant
