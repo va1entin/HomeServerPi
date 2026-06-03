@@ -57,6 +57,7 @@
         cmd: udevadm settle
       become: true
 
+    # systemd oneshot equivalen ran into some kind of environment issue so we use good old cron
     - name: Add cron job to restart HomeAssistant container after reboots to work around ConBee/ZHA issues
       cron:
         name: "Restart HomeAssistant after reboot"
