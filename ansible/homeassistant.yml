@@ -3,6 +3,7 @@
   hosts: "pi4"
   vars:
     homeassistant_version: "2026.7.4"
+    integration_stellantis_vehicles_version: "2026.7.2"
     conbee_dev_host: "/dev/ttyACM0" # /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II
     conbee_dev_container: "/dev/ttyACM0"
   tasks:
@@ -66,6 +67,12 @@
         special_time: "reboot"
         job: '/bin/sh -c "sleep 90; podman stop -t 60 homeassistant; sleep 10; podman start homeassistant"'
       become: true
+
+    - name: Get homeassistant-stellantis-vehicles integration from GitHub
+      ansible.builtin.git:
+        repo: "https://github.com/andreadegiovine/homeassistant-stellantis-vehicles"
+        dest: "/home/{{ ansible_facts['user_id'] }}/homeassistant-stellantis-vehicles"
+        version: "{{ integration_stellantis_vehicles_version }}"
 
     - name: Run HomeAssistant container
       containers.podman.podman_container:
