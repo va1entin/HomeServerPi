@@ -2,8 +2,8 @@
 - name: HomeAssistant
   hosts: "pi4"
   vars:
-    homeassistant_version: "2026.7.4"
-    integration_stellantis_vehicles_version: "2026.7.2"
+    homeassistant_version: "2026.9.0"
+    integration_stellantis_vehicles_version: "2026.9.1"
     conbee_dev_host: "/dev/ttyACM0" # /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II
     conbee_dev_container: "/dev/ttyACM0"
   tasks:
@@ -85,7 +85,7 @@
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
           - "homeassistant-config:/config"
-          - "/home/{{ ansible_facts['user_id'] }}/homeassistant-stellantis-vehicles/custom_components/stellantis_vehicles:/config/custom_components/stellantis_vehicles"
+          - "/home/{{ ansible_facts['user_id'] }}/homeassistant-stellantis-vehicles/custom_components/stellantis_vehicles:/config/custom_components/stellantis_vehicles:ro"
         device:
           - "{{ conbee_dev_host }}:{{ conbee_dev_container }}"
         state: started
