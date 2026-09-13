@@ -5,22 +5,22 @@
 #  }
 #}
 
-{{ vault_server_name }}
+http://:80 {
+  basic_auth {
+  {% for user in vault_gossa_users %}
+    {{ user.name }} {{ user.password }}
+  {% endfor %}
+  }
 
-basic_auth {
-{% for user in vault_gossa_users %}
-  {{ user.name }} {{ user.password }}
-{% endfor %}
+  {% for user in vault_gossa_users %}
+  @{{ user.name }}auth {
+    vars {http.auth.user.id} {{ user.name }}
+  }
+  handle @{{ user.name }}auth {
+    reverse_proxy gossa:{{ user.port }}
+  }
+
+  {% endfor %}
+
+  log
 }
-
-{% for user in vault_gossa_users %}
-@{{ user.name }}auth {
-  vars {http.auth.user.id} {{ user.name }}
-}
-handle @{{ user.name }}auth {
-  reverse_proxy gossa:{{ user.port }}
-}
-
-{% endfor %}
-
-log
