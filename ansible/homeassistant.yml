@@ -74,14 +74,14 @@
         dest: "/home/{{ ansible_facts['user_id'] }}/homeassistant-stellantis-vehicles"
         version: "{{ integration_stellantis_vehicles_version }}"
 
-    - name: Run HomeAssistant container
+    - name: Run HomeAssistant container reachable on {{ ansible_facts.default_ipv4.address }}
       containers.podman.podman_container:
         name: homeassistant
         image: "ghcr.io/home-assistant/home-assistant:{{ homeassistant_version }}"
         detach: true
         restart_policy: always
         ports:
-          - "8123:8123"
+          - "{{ ansible_facts.default_ipv4.address }}:8123:8123"
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
           - "homeassistant-config:/config"

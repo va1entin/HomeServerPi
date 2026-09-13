@@ -4,15 +4,15 @@
   vars:
     media_dir: "/mnt/data/vault"
   tasks:
-    - name: Start Jellyfin container
+    - name: Start Jellyfin container reachable on {{ ansible_facts.default_ipv4.address }}
       containers.podman.podman_container:
         name: jellyfin
         image: "docker.io/jellyfin/jellyfin:12.0"
         detach: true
         restart_policy: always
         ports:
-          - "8096:8096"
-          - "7359:7359"
+          - "{{ ansible_facts.default_ipv4.address }}:8096:8096"
+          - "{{ ansible_facts.default_ipv4.address }}:7359:7359"
         volumes:
           - "/etc/localtime:/etc/localtime:ro"
           - "jellyfin-config:/config"

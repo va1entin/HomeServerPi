@@ -31,7 +31,7 @@
         state: present
       become: true
 
-    - name: Start Caddy container
+    - name: Start Caddy container reachable on {{ ansible_facts.default_ipv4.address }}
       containers.podman.podman_container:
         name: caddy
         image: docker.io/caddy:2.11.4-alpine
@@ -44,6 +44,5 @@
           - "{{ network_name }}"
           - "{{ network_name }}-internal"
         ports:
-          - "80:80"
-          - "443:443"
+          - "{{ ansible_facts.default_ipv4.address }}:80:80"
         state: started
