@@ -34,7 +34,7 @@
     - name: Start Caddy container reachable on {{ ansible_facts.default_ipv4.address }}
       containers.podman.podman_container:
         name: caddy
-        image: docker.io/caddy:2.11.4-alpine
+        image: docker.io/caddy:2.11.7-alpine
         detach: true
         restart_policy: always
         volumes:
