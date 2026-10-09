@@ -2,7 +2,7 @@
 - name: HomeAssistant
   hosts: "pi4"
   vars:
-    homeassistant_version: "2026.9.2"
+    homeassistant_version: "2026.10.0"
     integration_stellantis_vehicles_version: "2026.9.4"
     conbee_dev_host: "/dev/ttyACM0" # /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II
     conbee_dev_container: "/dev/ttyACM0"
