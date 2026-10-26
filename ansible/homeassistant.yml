@@ -2,8 +2,9 @@
 - name: HomeAssistant
   hosts: "pi4"
   vars:
-    homeassistant_version: "2026.10.0"
+    homeassistant_version: "2026.10.4"
     integration_stellantis_vehicles_version: "2026.9.4"
+    integration_googlefindmy_version: "v1.7.14"
     conbee_dev_host: "/dev/ttyACM0" # /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II
     conbee_dev_container: "/dev/ttyACM0"
   tasks:
@@ -74,6 +75,12 @@
         dest: "/home/{{ ansible_facts['user_id'] }}/homeassistant-stellantis-vehicles"
         version: "{{ integration_stellantis_vehicles_version }}"
 
+    - name: Get GoogleFindMy-HA integration from GitHub
+      ansible.builtin.git:
+        repo: "https://github.com/BSkando/GoogleFindMy-HA"
+        dest: "/home/{{ ansible_facts['user_id'] }}/GoogleFindMy-HA"
+        version: "{{ integration_googlefindmy_version }}"
+
     - name: Run HomeAssistant container reachable on {{ ansible_facts.default_ipv4.address }}
       containers.podman.podman_container:
         name: homeassistant
@@ -86,6 +93,7 @@
           - "/etc/localtime:/etc/localtime:ro"
           - "homeassistant-config:/config"
           - "/home/{{ ansible_facts['user_id'] }}/homeassistant-stellantis-vehicles/custom_components/stellantis_vehicles:/config/custom_components/stellantis_vehicles:ro"
+          - "/home/{{ ansible_facts['user_id'] }}/GoogleFindMy-HA/custom_components/googlefindmy:/config/custom_components/googlefindmy:ro"
         device:
           - "{{ conbee_dev_host }}:{{ conbee_dev_container }}"
         state: started
